@@ -1,4 +1,4 @@
-# Content Command
+# Content Command v3
 
 Open-source social media content management system built for local service businesses.
 

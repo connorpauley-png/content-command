@@ -23,9 +23,9 @@ from datetime import datetime
 # Add parent to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-COMPANYCAM_TOKEN = os.environ["COMPANYCAM_TOKEN"]
-SUPABASE_URL = "process.env.NEXT_PUBLIC_SUPABASE_URL"
-SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+COMPANYCAM_TOKEN = os.environ.get("COMPANYCAM_TOKEN", "")
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 
 def log(msg):
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {msg}")

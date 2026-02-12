@@ -17,7 +17,7 @@ from datetime import datetime
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, field
 
-COMPANYCAM_TOKEN = os.environ["COMPANYCAM_TOKEN"]
+COMPANYCAM_TOKEN = os.environ.get("COMPANYCAM_TOKEN", "")
 COMPANYCAM_API = "https://api.companycam.com/v2"
 
 # GPS tolerance in meters (50m = same property)

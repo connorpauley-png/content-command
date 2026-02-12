@@ -27,19 +27,6 @@ yarn-error.log*
 
 # local env files
 .env*.local
-.env
-
-# logs
-*.log
-
-# enhanced photos output
-/enhanced/
-
-# script state files
-scripts/.cc_auto_state.json
-scripts/.companycam_state.json
-scripts/weather-triggers-log.json
-scripts/__pycache__/
 
 # vercel
 .vercel

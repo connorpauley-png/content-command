@@ -2,7 +2,7 @@
 const ASTRIA_API_KEY = process.env.ASTRIA_API_KEY || ''
 
 // Connor's FaceID tune on Nano Banana Pro 2
-export const DEFAULT_TUNE_ID = Number(process.env.ASTRIA_TUNE_ID) || 0
+export const CONNOR_TUNE_ID = 4049178
 export const BASE_TUNE_ID = 3618064 // Nano Banana Pro 2 (Gemini 3)
 
 export interface GenerateImageOptions {

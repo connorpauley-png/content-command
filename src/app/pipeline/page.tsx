@@ -50,7 +50,7 @@ export default function PipelinePage() {
   useEffect(() => {
     const i = setInterval(() => {
       fetch('/api/posts?limit=200').then(r => r.ok ? r.json() : null).then(d => { if (Array.isArray(d)) setPosts(d) }).catch(() => {})
-    }, 30000)
+    }, 120000)
     return () => clearInterval(i)
   }, [])
 
@@ -67,9 +67,9 @@ export default function PipelinePage() {
           if (data.complete) { fetchPosts(); break }
         } catch { /* ignore */ }
       }
-    }, 3000)
+    }, 15000)
     return () => clearInterval(poll)
-  }, [generatingIds, fetchPosts])
+  }, [generatingIds])
 
   const filteredPosts = platformFilters.length === 0 ? posts : posts.filter(p => p.platforms?.some(pid => platformFilters.includes(pid)))
 

@@ -20,15 +20,15 @@ from dataclasses import dataclass
 from collections import defaultdict
 
 # API Keys
-COMPANYCAM_TOKEN = os.environ["COMPANYCAM_TOKEN"]
+COMPANYCAM_TOKEN = os.environ.get("COMPANYCAM_TOKEN", "")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 
 # If no Anthropic key, try OpenAI
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
 COMPANYCAM_API = "https://api.companycam.com/v2"
-SUPABASE_URL = "process.env.NEXT_PUBLIC_SUPABASE_URL"
-SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 
 @dataclass
 class PhotoClassification:

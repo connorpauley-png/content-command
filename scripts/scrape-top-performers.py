@@ -17,8 +17,8 @@ from typing import Optional, List, Dict
 import requests
 
 # Database
-SUPABASE_URL = "process.env.NEXT_PUBLIC_SUPABASE_URL"
-SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 
 # Top performers to track (seeded list)
 TOP_PERFORMERS = {

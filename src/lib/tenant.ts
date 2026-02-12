@@ -1,7 +1,6 @@
 /**
  * Multi-tenant configuration
- * Replace the example values below with your business details,
- * or load from database in a multi-tenant setup.
+ * Currently hardcoded to College Bros, but structured for multi-tenant
  */
 
 export interface Organization {
@@ -32,26 +31,26 @@ export interface Integration {
   status: 'active' | 'paused' | 'error' | 'disconnected'
 }
 
-// Current tenant - Example Business
+// Current tenant - College Bros
 // In multi-tenant, this would come from auth/session
 export const CURRENT_ORG: Organization = {
-  id: 'example-001',
-  name: process.env.NEXT_PUBLIC_BUSINESS_NAME || 'My Service Business',
-  slug: 'my-business',
+  id: 'collegebros-001',
+  name: 'College Bros Outdoor Services',
+  slug: 'collegebros',
   industry: 'lawn_care',
   brandVoice: 'friendly',
   brandColors: {
     primary: '#254421',
     secondary: '#e2b93b',
   },
-  contactPhone: process.env.BUSINESS_PHONE || '(555) 000-0000',
-  contactEmail: process.env.BUSINESS_EMAIL || 'hello@example.com',
-  website: process.env.BUSINESS_WEBSITE || 'example.com',
-  timezone: process.env.BUSINESS_TIMEZONE || 'America/Chicago',
+  contactPhone: process.env.CONTACT_PHONE || '',
+  contactEmail: process.env.CONTACT_EMAIL || '',
+  website: 'collegebrosllc.com',
+  timezone: 'America/Chicago',
   plan: 'pro',
 }
 
-// Current integrations — credentials loaded from env vars
+// Current integrations
 export const CURRENT_INTEGRATIONS: Integration[] = [
   {
     id: 'int-cc-001',
@@ -63,7 +62,7 @@ export const CURRENT_INTEGRATIONS: Integration[] = [
       token: process.env.COMPANYCAM_TOKEN || '',
     },
     config: {
-      companyId: process.env.COMPANYCAM_COMPANY_ID || '',
+      companyId: '1139758',
     },
     status: 'active',
   },
@@ -72,9 +71,9 @@ export const CURRENT_INTEGRATIONS: Integration[] = [
     orgId: CURRENT_ORG.id,
     type: 'instagram',
     category: 'destination',
-    name: 'Instagram Business',
+    name: 'Instagram (@collegebros31)',
     credentials: {
-      accountId: process.env.IG_ACCOUNT_ID || '',
+      accountId: process.env.IG_BUSINESS_ACCOUNT_ID || '',
       pageToken: process.env.FB_PAGE_TOKEN || '',
     },
     config: {},
@@ -85,7 +84,7 @@ export const CURRENT_INTEGRATIONS: Integration[] = [
     orgId: CURRENT_ORG.id,
     type: 'facebook',
     category: 'destination',
-    name: 'Facebook Page',
+    name: 'Facebook (Collegebrosllc)',
     credentials: {
       pageId: process.env.FB_PAGE_ID || '',
       pageToken: process.env.FB_PAGE_TOKEN || '',
@@ -98,12 +97,12 @@ export const CURRENT_INTEGRATIONS: Integration[] = [
     orgId: CURRENT_ORG.id,
     type: 'x',
     category: 'destination',
-    name: 'X (Twitter)',
+    name: 'X (@pauley_connor)',
     credentials: {
       consumerKey: process.env.TWITTER_CONSUMER_KEY || '',
       consumerSecret: process.env.TWITTER_CONSUMER_SECRET || '',
       accessToken: process.env.TWITTER_ACCESS_TOKEN || '',
-      accessTokenSecret: process.env.TWITTER_ACCESS_SECRET || '',
+      accessTokenSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET || '',
     },
     config: {},
     status: 'active',
@@ -113,7 +112,7 @@ export const CURRENT_INTEGRATIONS: Integration[] = [
     orgId: CURRENT_ORG.id,
     type: 'linkedin',
     category: 'destination',
-    name: 'LinkedIn',
+    name: 'LinkedIn (Connor Pauley)',
     credentials: {
       accessToken: process.env.LINKEDIN_ACCESS_TOKEN || '',
       personUrn: process.env.LINKEDIN_PERSON_URN || '',

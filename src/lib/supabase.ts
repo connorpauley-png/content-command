@@ -41,8 +41,8 @@ export type CalendarEvent = {
 export const PLATFORMS = [
   { id: 'x', name: 'X/Twitter', icon: '𝕏', color: 'bg-black text-white' },
   { id: 'facebook', name: 'Facebook', icon: 'f', color: 'bg-blue-600 text-white' },
-  { id: 'instagram', name: 'Instagram (Business)', icon: '📷', color: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' },
-  { id: 'ig_personal', name: 'Instagram (@personal_brand)', icon: '🎿', color: 'bg-gradient-to-r from-orange-500 to-pink-500 text-white' },
+  { id: 'instagram', name: 'Instagram (@collegebros31)', icon: '📷', color: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' },
+  { id: 'ig_personal', name: 'Instagram (@connorpauleyski)', icon: '🎿', color: 'bg-gradient-to-r from-orange-500 to-pink-500 text-white' },
   { id: 'linkedin', name: 'LinkedIn', icon: 'in', color: 'bg-blue-700 text-white' },
   { id: 'gmb', name: 'Google Business', icon: 'G', color: 'bg-green-600 text-white' },
   { id: 'nextdoor', name: 'Nextdoor', icon: 'N', color: 'bg-emerald-600 text-white' },

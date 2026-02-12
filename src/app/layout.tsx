@@ -15,8 +15,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Content Command",
-  description: "Social media content management for local service businesses",
+  title: "Content Command Center — College Bros",
+  description: "Social media content management for College Bros LLC",
 };
 
 export default function RootLayout({

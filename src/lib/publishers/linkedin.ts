@@ -1,7 +1,7 @@
 import { PublishResult } from './types'
 
 const ACCESS_TOKEN = process.env.LINKEDIN_ACCESS_TOKEN || ''
-const PERSON_URN = process.env.LINKEDIN_PERSON_URN || process.env.LINKEDIN_PERSON_URN!
+const PERSON_URN = process.env.LINKEDIN_PERSON_URN!
 
 async function uploadImage(photoUrl: string): Promise<string | null> {
   try {

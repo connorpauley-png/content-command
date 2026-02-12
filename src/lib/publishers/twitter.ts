@@ -141,7 +141,7 @@ export async function publishToTwitter(content: string, photoUrls: string[]): Pr
             resolve({
               success: true,
               postId,
-              postUrl: postId ? `https://x.com/your_handle/status/${postId}` : undefined,
+              postUrl: postId ? `https://x.com/pauley_connor/status/${postId}` : undefined,
             })
           } catch {
             resolve({ success: false, error: 'Failed to parse Twitter response' })

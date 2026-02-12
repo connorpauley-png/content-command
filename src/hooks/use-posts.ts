@@ -28,8 +28,9 @@ export function postsKey(filters?: PostFilters) {
 export function usePosts(filters?: PostFilters) {
   const key = postsKey(filters)
   const { data, error, isLoading, mutate } = useSWR<Post[]>(key, fetcher, {
-    revalidateOnFocus: true,
-    dedupingInterval: 2000,
+    revalidateOnFocus: false,
+    dedupingInterval: 10000,
+    refreshInterval: 0,
   })
 
   return {

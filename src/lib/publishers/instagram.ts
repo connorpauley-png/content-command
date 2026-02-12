@@ -1,6 +1,6 @@
 import { PublishResult } from './types'
 
-const IG_ACCOUNT_ID = process.env.IG_ACCOUNT_ID || process.env.IG_ACCOUNT_ID!
+const IG_ACCOUNT_ID = process.env.IG_ACCOUNT_ID!
 const PAGE_TOKEN = process.env.FB_PAGE_TOKEN || ''
 
 async function createContainer(accountId: string, token: string, params: Record<string, string>): Promise<string> {
@@ -22,14 +22,14 @@ async function publishContainer(accountId: string, token: string, containerId: s
   })
   const data = await res.json()
   if (data.id) {
-    return { success: true, postId: data.id, postUrl: `https://instagram.com/your_handle` }
+    return { success: true, postId: data.id, postUrl: `https://instagram.com/collegebros31` }
   }
   return { success: false, error: data.error?.message || 'IG publish failed' }
 }
 
 export async function publishToInstagram(content: string, photoUrls: string[]): Promise<PublishResult> {
   try {
-    console.log(`[Instagram] Publishing @your_handle (${photoUrls.length} photos)`)
+    console.log(`[Instagram] Publishing @collegebros31 (${photoUrls.length} photos)`)
 
     if (photoUrls.length === 0) {
       return { success: false, error: 'Instagram requires at least one image' }

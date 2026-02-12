@@ -3,7 +3,7 @@
 
 import { createHash } from 'crypto'
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'process.env.NEXT_PUBLIC_SUPABASE_URL'
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 const BUCKET = 'enhanced-photos'
 const ENHANCED_PREFIX = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/`

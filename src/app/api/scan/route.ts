@@ -41,7 +41,7 @@ Return JSON only:
   "quality": 1-10 (10=stunning, 1=unusable),
   "postType": "before-after" | "transformation" | "crew" | "satisfying" | "equipment",
   "platforms": ["instagram", "facebook"],
-  "caption": "Natural friendly caption for Your Business. No emojis. Include (555) 000-0000 for service posts.",
+  "caption": "Natural friendly caption for College Bros. No emojis. Include (318) 600-9123 for service posts.",
   "hashtags": ["MonroeLA", "LawnCare"] max 6
 }
 
@@ -88,8 +88,8 @@ Voice: friendly neighbor who runs a great company.`
     quality: 7,
     postType,
     platforms: ['instagram', 'facebook'],
-    caption: `Another property taken care of in ${address.split(',')[1]?.trim() || 'Monroe'}. This is what we do. Call or text (555) 000-0000 if your yard needs attention.`,
-    hashtags: ['MonroeLA', 'LawnCare', 'Landscaping', 'YourBrand', 'WestMonroe'],
+    caption: `Another property taken care of in ${address.split(',')[1]?.trim() || 'Monroe'}. This is what we do. Call or text (318) 600-9123 if your yard needs attention.`,
+    hashtags: ['MonroeLA', 'LawnCare', 'Landscaping', 'CollegeBros', 'WestMonroe'],
   }
 }
 

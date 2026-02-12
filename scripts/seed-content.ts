@@ -8,7 +8,7 @@
  *   curl -X POST http://localhost:3000/api/seed
  */
 
-const SUPABASE_URL = 'process.env.NEXT_PUBLIC_SUPABASE_URL'
+const SUPABASE_URL = process.env.SUPABASE_URL!
 const SERVICE_ROLE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 
@@ -26,7 +26,7 @@ interface SeedPost {
 const SEED_POSTS: SeedPost[] = [
   // ── Instagram/Facebook Week 1 ──
   {
-    content: `Spring is coming and your yard knows it.\n\nWe're booking lawn care, landscaping, mulch, and pressure washing for the season. 27-person crew, fully insured, and we actually show up when we say we will (revolutionary concept, I know).\n\nIf your yard needs some love after winter, give us a shout.\n\nCall or text: (555) 000-0000\nyourbusiness.com\n\n#your cityLA #Westyour city #LawnCare #SpringCleanup #YourBrand`,
+    content: `Spring is coming and your yard knows it.\n\nWe're booking lawn care, landscaping, mulch, and pressure washing for the season. 27-person crew, fully insured, and we actually show up when we say we will (revolutionary concept, I know).\n\nIf your yard needs some love after winter, give us a shout.\n\nCall or text: (318) 600-9123\ncollegebrosllc.com\n\n#MonroeLA #WestMonroe #LawnCare #SpringCleanup #CollegeBros`,
     platforms: ['instagram', 'facebook'],
     status: 'approved',
     scheduled_at: '2026-02-10T11:00:00-06:00',
@@ -34,7 +34,7 @@ const SEED_POSTS: SeedPost[] = [
     notes: null, photo_urls: [], posted_ids: {},
   },
   {
-    content: `Tuesday morning transformation. Started at 6 AM, finished by 10.\n\nNot a bad way to start the week.\n\n(555) 000-0000\n\n#Landscaping #your cityLA #BeforeAndAfter #LawnTransformation`,
+    content: `Tuesday morning transformation. Started at 6 AM, finished by 10.\n\nNot a bad way to start the week.\n\n(318) 600-9123\n\n#Landscaping #MonroeLA #BeforeAndAfter #LawnTransformation`,
     platforms: ['instagram'],
     status: 'draft',
     scheduled_at: '2026-02-11T10:00:00-06:00',
@@ -42,7 +42,7 @@ const SEED_POSTS: SeedPost[] = [
     notes: null, photo_urls: [], posted_ids: {},
   },
   {
-    content: `Quick tip if you do your own lawn: February in Louisiana is when you need to put down pre-emergent.\n\nIt's basically a shield against crabgrass and clover. Skip it now and you'll be fighting weeds all summer wondering what went wrong.\n\nWe include it on every property we service, but if you're DIY — grab some Barricade or Dimension from your local hardware store and put it down this weekend. Your lawn will thank you in April.\n\nHappy to answer questions if you're not sure what to use.\n\n#LawnCare #Louisiana #SpringPrep #your cityLA #LawnTips`,
+    content: `Quick tip if you do your own lawn: February in Louisiana is when you need to put down pre-emergent.\n\nIt's basically a shield against crabgrass and clover. Skip it now and you'll be fighting weeds all summer wondering what went wrong.\n\nWe include it on every property we service, but if you're DIY — grab some Barricade or Dimension from your local hardware store and put it down this weekend. Your lawn will thank you in April.\n\nHappy to answer questions if you're not sure what to use.\n\n#LawnCare #Louisiana #SpringPrep #MonroeLA #LawnTips`,
     platforms: ['instagram', 'facebook'],
     status: 'approved',
     scheduled_at: '2026-02-12T12:00:00-06:00',
@@ -50,7 +50,7 @@ const SEED_POSTS: SeedPost[] = [
     notes: null, photo_urls: [], posted_ids: {},
   },
   {
-    content: `I will never get tired of a clean edge.\n\nIf you need this kind of energy in your yard — (555) 000-0000\n\n#Satisfying #PressureWashing #Landscaping #your cityLA`,
+    content: `I will never get tired of a clean edge.\n\nIf you need this kind of energy in your yard — (318) 600-9123\n\n#Satisfying #PressureWashing #Landscaping #MonroeLA`,
     platforms: ['instagram'],
     status: 'draft',
     scheduled_at: '2026-02-13T10:00:00-06:00',
@@ -58,7 +58,7 @@ const SEED_POSTS: SeedPost[] = [
     notes: null, photo_urls: [], posted_ids: {},
   },
   {
-    content: `Shoutout to the crew that makes this whole thing work.\n\nThese guys show up early, work hard, and make every yard look incredible. Your Business wouldn't exist without them.\n\nWe're also hiring for spring if you want to join the team — DM us or text (555) 000-0000.\n\n#YourBrand #your cityLA #HiringNow #TeamWork #LawnCare`,
+    content: `Shoutout to the crew that makes this whole thing work.\n\nThese guys show up early, work hard, and make every yard look incredible. College Bros wouldn't exist without them.\n\nWe're also hiring for spring if you want to join the team — DM us or text (318) 600-9123.\n\n#CollegeBros #MonroeLA #HiringNow #TeamWork #LawnCare`,
     platforms: ['instagram', 'facebook'],
     status: 'approved',
     scheduled_at: '2026-02-14T11:00:00-06:00',
@@ -67,7 +67,7 @@ const SEED_POSTS: SeedPost[] = [
   },
   // ── Twitter/X Week 1 ──
   {
-    content: `I'm 21, I run a landscaping company with 27 employees, and I just built an AI-powered CRM from scratch. Here's how that happened: (1/10)\n\n(2/10) May 2024: bought a mower to make gas money at my university. Posted on Nextdoor. Got my first customer. Thought "ok cool, beer money." Had no idea what was coming.\n\n(3/10) Turns out if you show up on time and do good work, people tell their neighbors. Within 6 months we had 10 employees. I was scheduling crews between classes and learning management by trial and a LOT of error.\n\n(4/10) Today: 27 employees. 5-person crews. Lawn care, landscaping, pressure washing, Christmas lights. 47 Google reviews at 4.9 stars. Still a full-time student at my university. Still occasionally late to class.\n\n(5/10) The problem: every CRM in the home service industry is either $500/month (ServiceTitan, looking at you) or it's a spreadsheet someone's uncle made. Neither worked for us.\n\n(6/10) So I built my own. My CRM — 144,000 lines of code. Scheduling, invoicing, customer pipeline, AI estimates, crew management, route optimization. Used Claude (Anthropic's AI) to help build it.\n\n(7/10) The AI was incredible for writing code fast. But it doesn't know what happens at 6 AM when a mower breaks and three customers are calling. That part came from actually being in the field.\n\n(8/10) Every feature exists because something went wrong first. Double-booked a crew → auto-scheduling. Lost a mower for two weeks → equipment tracker. Writing proposals at midnight → AI estimates from photos.\n\n(9/10) The long-term plan: make Your Business franchise-ready with My CRM as the operating system. Give someone the software, the playbook, and the brand — and they can run a location anywhere.\n\n(10/10) Going to build all of this in public. Real numbers, real code, real mistakes. If you're building something too, let's connect. Always happy to learn from people further along than me.\n\nyour-app.vercel.app`,
+    content: `I'm 21, I run a landscaping company with 27 employees, and I just built an AI-powered CRM from scratch. Here's how that happened: (1/10)\n\n(2/10) May 2024: bought a mower to make gas money at ULM. Posted on Nextdoor. Got my first customer. Thought "ok cool, beer money." Had no idea what was coming.\n\n(3/10) Turns out if you show up on time and do good work, people tell their neighbors. Within 6 months we had 10 employees. I was scheduling crews between classes and learning management by trial and a LOT of error.\n\n(4/10) Today: 27 employees. 5-person crews. Lawn care, landscaping, pressure washing, Christmas lights. 47 Google reviews at 4.9 stars. Still a full-time student at ULM. Still occasionally late to class.\n\n(5/10) The problem: every CRM in the home service industry is either $500/month (ServiceTitan, looking at you) or it's a spreadsheet someone's uncle made. Neither worked for us.\n\n(6/10) So I built my own. Apex Pro — 144,000 lines of code. Scheduling, invoicing, customer pipeline, AI estimates, crew management, route optimization. Used Claude (Anthropic's AI) to help build it.\n\n(7/10) The AI was incredible for writing code fast. But it doesn't know what happens at 6 AM when a mower breaks and three customers are calling. That part came from actually being in the field.\n\n(8/10) Every feature exists because something went wrong first. Double-booked a crew → auto-scheduling. Lost a mower for two weeks → equipment tracker. Writing proposals at midnight → AI estimates from photos.\n\n(9/10) The long-term plan: make College Bros franchise-ready with Apex Pro as the operating system. Give someone the software, the playbook, and the brand — and they can run a location anywhere.\n\n(10/10) Going to build all of this in public. Real numbers, real code, real mistakes. If you're building something too, let's connect. Always happy to learn from people further along than me.\n\napex-pro-mu.vercel.app`,
     platforms: ['x'],
     status: 'approved',
     scheduled_at: '2026-02-10T08:00:00-06:00',
@@ -91,7 +91,7 @@ const SEED_POSTS: SeedPost[] = [
     notes: null, photo_urls: [], posted_ids: {},
   },
   {
-    content: `Things I did before 10 AM today:\n- Dispatched 3 crews\n- Sent 4 estimates\n- Attended an accounting lecture\n- Fixed a bug in My CRM\n- Ate a questionable gas station burrito\n\nSmall business owner life is very glamorous.`,
+    content: `Things I did before 10 AM today:\n- Dispatched 3 crews\n- Sent 4 estimates\n- Attended an accounting lecture\n- Fixed a bug in Apex Pro\n- Ate a questionable gas station burrito\n\nCollege CEO life is very glamorous.`,
     platforms: ['x'],
     status: 'approved',
     scheduled_at: '2026-02-12T10:00:00-06:00',
@@ -116,7 +116,7 @@ const SEED_POSTS: SeedPost[] = [
   },
   // ── LinkedIn Week 1 ──
   {
-    content: `I started a landscaping company in college because I needed gas money. Bought a mower, posted on Nextdoor, and hoped somebody called.\n\nThree years later, Your Business Name has 27 employees running crews across your city. I genuinely have no idea how that happened.\n\nAlong the way I learned that every CRM in our industry was either $500/month or a spreadsheet someone's uncle made in 2012. So I built my own — an AI-powered tool called My CRM.\n\nI'm 21, still in school at my university, and most days I'm dispatching crews between classes while pretending to pay attention in Accounting.\n\nI'm going to start sharing what it's actually like to build a business in college. The wins, the embarrassing mistakes, and everything in between.\n\nIf you're in the service industry or just like watching someone figure it out in real time — stick around. It should be entertaining at minimum.`,
+    content: `I started a landscaping company in college because I needed gas money. Bought a mower, posted on Nextdoor, and hoped somebody called.\n\nThree years later, College Bros Outdoor Services has 27 employees running crews across Monroe, Louisiana. I genuinely have no idea how that happened.\n\nAlong the way I learned that every CRM in our industry was either $500/month or a spreadsheet someone's uncle made in 2012. So I built my own — an AI-powered tool called Apex Pro.\n\nI'm 21, still in school at ULM, and most days I'm dispatching crews between classes while pretending to pay attention in Accounting.\n\nI'm going to start sharing what it's actually like to build a business in college. The wins, the embarrassing mistakes, and everything in between.\n\nIf you're in the service industry or just like watching someone figure it out in real time — stick around. It should be entertaining at minimum.`,
     platforms: ['linkedin'],
     status: 'approved',
     scheduled_at: '2026-02-10T07:30:00-06:00',
@@ -124,7 +124,7 @@ const SEED_POSTS: SeedPost[] = [
     notes: null, photo_urls: [], posted_ids: {},
   },
   {
-    content: `Since I'm new here, figured I'd share some real numbers from running a landscaping company as a college student:\n\nEmployees: 27 (mostly my university students who are way more reliable than I was at their age)\nCrew structure: 5-person teams, 1 lead + 4 ops\nServices: lawn care, landscaping, pressure washing, Christmas lights\nFounded: May 2024\nGoogle reviews: 47 at 4.9 stars\nCRM: got frustrated with every option, accidentally built my own\n\nBiggest lesson so far: your crew IS the business. I can sell and market all day, but if the team doesn't show up and do great work, none of it matters.\n\nWhat would you want to hear more about? Happy to share whatever's helpful.`,
+    content: `Since I'm new here, figured I'd share some real numbers from running a landscaping company as a college student:\n\nEmployees: 27 (mostly ULM students who are way more reliable than I was at their age)\nCrew structure: 5-person teams, 1 lead + 4 ops\nServices: lawn care, landscaping, pressure washing, Christmas lights\nFounded: May 2024\nGoogle reviews: 47 at 4.9 stars\nCRM: got frustrated with every option, accidentally built my own\n\nBiggest lesson so far: your crew IS the business. I can sell and market all day, but if the team doesn't show up and do great work, none of it matters.\n\nWhat would you want to hear more about? Happy to share whatever's helpful.`,
     platforms: ['linkedin'],
     status: 'approved',
     scheduled_at: '2026-02-12T12:00:00-06:00',
@@ -132,7 +132,7 @@ const SEED_POSTS: SeedPost[] = [
     notes: null, photo_urls: [], posted_ids: {},
   },
   {
-    content: `I accidentally built a 144,000-line CRM application.\n\nI say "accidentally" because it started as "I just want a better way to schedule my lawn crews" and turned into a full operating system with invoicing, customer pipeline, AI features, route optimization, and crew management.\n\nThe tool that made it possible: Claude (Anthropic's AI assistant). But here's the thing — AI is incredible at writing code fast, but it has no idea what a landscaper actually needs at 6 AM when a mower breaks and three customers are calling.\n\nThat part came from three years of being in the field, making every mistake you can make, and knowing exactly what I wished I had on my phone.\n\nIt's called My CRM. Still early, still rough around the edges, but it's running my actual business right now.\n\nGoing to share the build process here — the architecture decisions, the features, and definitely the bugs. Should be fun.\n\nyour-app.vercel.app if you're curious.`,
+    content: `I accidentally built a 144,000-line CRM application.\n\nI say "accidentally" because it started as "I just want a better way to schedule my lawn crews" and turned into a full operating system with invoicing, customer pipeline, AI features, route optimization, and crew management.\n\nThe tool that made it possible: Claude (Anthropic's AI assistant). But here's the thing — AI is incredible at writing code fast, but it has no idea what a landscaper actually needs at 6 AM when a mower breaks and three customers are calling.\n\nThat part came from three years of being in the field, making every mistake you can make, and knowing exactly what I wished I had on my phone.\n\nIt's called Apex Pro. Still early, still rough around the edges, but it's running my actual business right now.\n\nGoing to share the build process here — the architecture decisions, the features, and definitely the bugs. Should be fun.\n\napex-pro-mu.vercel.app if you're curious.`,
     platforms: ['linkedin'],
     status: 'approved',
     scheduled_at: '2026-02-14T08:00:00-06:00',
@@ -149,7 +149,7 @@ const SEED_POSTS: SeedPost[] = [
     notes: null, photo_urls: [], posted_ids: {},
   },
   {
-    content: `Quick tip for anyone with a lawn in the your city area. Mid-February is your window to put down pre-emergent if you want to stay ahead of crabgrass and other warm-season weeds. Soil temps are starting to climb and once they hit 55 degrees consistently, weed seeds are already germinating. By the time you see them, it's too late. If you're not sure what product to use or how to time it, shoot us a message. We handle this for customers every year and we're happy to point you in the right direction even if you're a DIY person.`,
+    content: `Quick tip for anyone with a lawn in the Monroe area. Mid-February is your window to put down pre-emergent if you want to stay ahead of crabgrass and other warm-season weeds. Soil temps are starting to climb and once they hit 55 degrees consistently, weed seeds are already germinating. By the time you see them, it's too late. If you're not sure what product to use or how to time it, shoot us a message. We handle this for customers every year and we're happy to point you in the right direction even if you're a DIY person.`,
     platforms: ['facebook'],
     status: 'approved',
     scheduled_at: '2026-02-11T18:00:00-06:00',
@@ -166,7 +166,7 @@ const SEED_POSTS: SeedPost[] = [
     photo_urls: [], posted_ids: {},
   },
   {
-    content: `We're not a franchise. We're not some big national chain. We're a crew of guys going to school at my university who decided to build something real instead of waiting around for someone to hand us a job. Your Business started because we saw yards in your city that deserved better and we knew we could deliver. We show up on time, we communicate like normal people, and we actually care what your property looks like when we leave. That's it. No gimmicks. Just solid work from guys who are building their future one yard at a time. Appreciate every single customer who's trusted us so far.`,
+    content: `We're not a franchise. We're not some big national chain. We're a crew of guys going to school at ULM who decided to build something real instead of waiting around for someone to hand us a job. College Bros started because we saw yards in Monroe that deserved better and we knew we could deliver. We show up on time, we communicate like normal people, and we actually care what your property looks like when we leave. That's it. No gimmicks. Just solid work from guys who are building their future one yard at a time. Appreciate every single customer who's trusted us so far.`,
     platforms: ['facebook'],
     status: 'draft',
     scheduled_at: '2026-02-13T17:30:00-06:00',
@@ -175,7 +175,7 @@ const SEED_POSTS: SeedPost[] = [
     photo_urls: [], posted_ids: {},
   },
   {
-    content: `Real talk from a real customer:\n\n"I've been using Your Business for months now and honestly I wish I'd found them sooner. They're always on time and my yard has never looked this good. If you're looking for a lawn crew that actually cares, these are your guys."\n\nWe don't run on ads. We run on word of mouth. If we've taken care of your yard, drop a review or tag someone who needs us. That's how we keep growing.`,
+    content: `Real talk from a real customer:\n\n"I've been using College Bros for months now and honestly I wish I'd found them sooner. They're always on time and my yard has never looked this good. If you're looking for a lawn crew that actually cares, these are your guys."\n\nWe don't run on ads. We run on word of mouth. If we've taken care of your yard, drop a review or tag someone who needs us. That's how we keep growing.`,
     platforms: ['facebook'],
     status: 'draft',
     scheduled_at: '2026-02-14T10:00:00-06:00',
@@ -185,7 +185,7 @@ const SEED_POSTS: SeedPost[] = [
   },
   // ── Google Business Week of Feb 10 ──
   {
-    content: `Spring is right around the corner in your city and now is the time to get your property ready for the growing season. At Your Business Name, we're currently booking spring cleanups for residential and commercial properties across the your city area.\n\nOur spring cleanup service covers everything you need to start the season right. We handle leaf and debris removal, bed edging and reshaping, fresh mulch installation, shrub trimming and shaping, and a full first mow with clean edges. After a long winter, most yards need a reset before regular maintenance kicks in. Beds get overgrown, edges get soft, and leaves pile up in corners. A proper spring cleanup sets the foundation for a yard that looks good all season without playing catch-up.\n\nWe're a local crew based out of my university and we've been serving the your city and your area area for multiple seasons now. We show up when we say we will, we communicate clearly, and we take pride in how your property looks when we drive away.\n\nSpots are filling up and we always book out faster than people expect once March hits. Get on the schedule now and skip the wait.\n\nCall us at (555) 000-0000 or message us to book your spring cleanup today.`,
+    content: `Spring is right around the corner in Monroe and now is the time to get your property ready for the growing season. At College Bros Outdoor Services, we're currently booking spring cleanups for residential and commercial properties across the Monroe area.\n\nOur spring cleanup service covers everything you need to start the season right. We handle leaf and debris removal, bed edging and reshaping, fresh mulch installation, shrub trimming and shaping, and a full first mow with clean edges. After a long winter, most yards need a reset before regular maintenance kicks in. Beds get overgrown, edges get soft, and leaves pile up in corners. A proper spring cleanup sets the foundation for a yard that looks good all season without playing catch-up.\n\nWe're a local crew based out of ULM and we've been serving the Monroe and West Monroe area for multiple seasons now. We show up when we say we will, we communicate clearly, and we take pride in how your property looks when we drive away.\n\nSpots are filling up and we always book out faster than people expect once March hits. Get on the schedule now and skip the wait.\n\nCall us at (318) 600-9123 or message us to book your spring cleanup today.`,
     platforms: ['gmb'],
     status: 'approved',
     scheduled_at: '2026-02-11T09:00:00-06:00',
@@ -193,7 +193,7 @@ const SEED_POSTS: SeedPost[] = [
     notes: null, photo_urls: [], posted_ids: {},
   },
   {
-    content: `If you've been thinking about switching lawn care providers or hiring one for the first time, February is the best time to make that move. Your Business Name is currently locking in weekly mowing schedules for the spring and summer season in your city, your area, and surrounding areas.\n\nOur weekly maintenance service includes mowing, edging, blowing, and line trimming on every visit. We keep your property looking sharp week after week without you having to think about it. We also offer add-on services like bed maintenance, hedge trimming, and seasonal fertilizer and weed control applications for customers who want the full package.\n\nWhat makes us different is simple. We're local, we're consistent, and we actually communicate. You'll get a text when we're on the way. You'll get a follow-up if anything looks off. And if there's ever an issue, you can call or text us directly — you're not going through a call center or leaving a voicemail that never gets returned.\n\nWe started Your Business because we saw a gap in the market for reliable, professional lawn care that doesn't come with the headaches of dealing with bigger companies. Every property we service is a reflection of our reputation and we treat it that way.\n\nSpring schedules fill up every year. Lock in your spot now and your yard will be dialed in from the first week of growing season.\n\nCall (555) 000-0000 or send us a message to get on the schedule.`,
+    content: `If you've been thinking about switching lawn care providers or hiring one for the first time, February is the best time to make that move. College Bros Outdoor Services is currently locking in weekly mowing schedules for the spring and summer season in Monroe, West Monroe, and surrounding areas.\n\nOur weekly maintenance service includes mowing, edging, blowing, and line trimming on every visit. We keep your property looking sharp week after week without you having to think about it. We also offer add-on services like bed maintenance, hedge trimming, and seasonal fertilizer and weed control applications for customers who want the full package.\n\nWhat makes us different is simple. We're local, we're consistent, and we actually communicate. You'll get a text when we're on the way. You'll get a follow-up if anything looks off. And if there's ever an issue, you can call or text us directly — you're not going through a call center or leaving a voicemail that never gets returned.\n\nWe started College Bros because we saw a gap in the market for reliable, professional lawn care that doesn't come with the headaches of dealing with bigger companies. Every property we service is a reflection of our reputation and we treat it that way.\n\nSpring schedules fill up every year. Lock in your spot now and your yard will be dialed in from the first week of growing season.\n\nCall (318) 600-9123 or send us a message to get on the schedule.`,
     platforms: ['gmb'],
     status: 'approved',
     scheduled_at: '2026-02-13T09:00:00-06:00',
@@ -202,7 +202,7 @@ const SEED_POSTS: SeedPost[] = [
   },
   // ── Nextdoor Week of Feb 10 ──
   {
-    content: `Mid-February is the sweet spot to prep your lawn for spring in our area. Get your pre-emergent down now and you'll thank yourself in April. If you need a hand, we do lawn treatments across your city.`,
+    content: `Mid-February is the sweet spot to prep your lawn for spring in our area. Get your pre-emergent down now and you'll thank yourself in April. If you need a hand, we do lawn treatments across Monroe.`,
     platforms: ['nextdoor'],
     status: 'approved',
     scheduled_at: '2026-02-10T09:00:00-06:00',
@@ -218,7 +218,7 @@ const SEED_POSTS: SeedPost[] = [
     notes: null, photo_urls: [], posted_ids: {},
   },
   {
-    content: `We're booking spring cleanups now if anyone in the neighborhood needs their yard reset before the growing season kicks in. Your Business Name — local my university guys. Call or message us anytime.`,
+    content: `We're booking spring cleanups now if anyone in the neighborhood needs their yard reset before the growing season kicks in. College Bros Outdoor Services — local ULM guys. Call or message us anytime.`,
     platforms: ['nextdoor'],
     status: 'approved',
     scheduled_at: '2026-02-14T09:00:00-06:00',

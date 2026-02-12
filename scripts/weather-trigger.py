@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Weather-Triggered Marketing System for Your Business Name
+Weather-Triggered Marketing System for College Bros Outdoor Services
 Monroe, LA (32.5093, -92.1193)
 
 Checks weather conditions via Open-Meteo API and auto-generates
@@ -29,12 +29,8 @@ from urllib.error import URLError
 LAT = 32.5093
 LON = -92.1193
 
-SUPABASE_URL = "process.env.NEXT_PUBLIC_SUPABASE_URL"
-SUPABASE_KEY = (
-    os.environ["SUPABASE_SERVICE_ROLE_KEY"]
-    "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlbXdmZWVldmtvcWZtdWlqanVhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODc3NTY1MSwiZXhwIjoyMDg0MzUxNjUxfQ."
-    "VcK7aoj3NTgA2SFlf0_Gm2Z39fK-g8Er5YxuPpo_UVw"
-)
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 
 PLATFORMS = ["facebook", "instagram", "x", "nextdoor"]
 
@@ -55,21 +51,21 @@ STORM_WMO_CODES = {95, 96, 99, 85, 86}
 STORM_TEMPLATES = [
     (
         "Monroe and West Monroe -- if the storm left damage in your yard, "
-        "Your Business Name has our full team ready for cleanup. "
+        "College Bros Outdoor Services has our full team ready for cleanup. "
         "Fallen branches, downed limbs, debris everywhere -- we handle it all "
-        "so you don't have to. Reach out today at www.yourbusiness.com"
+        "so you don't have to. Reach out today at www.collegebrosllc.com"
     ),
     (
         "After last night's storm, yards across Monroe and West Monroe are a mess. "
-        "Your Business Name is already scheduling storm cleanup. "
+        "College Bros Outdoor Services is already scheduling storm cleanup. "
         "Our established team can get your property back in shape fast. "
-        "Visit www.yourbusiness.com or give us a call."
+        "Visit www.collegebrosllc.com or give us a call."
     ),
     (
         "Storm damage does not fix itself. If you are in Monroe or West Monroe "
         "and need trees cleared, debris hauled, or your yard put back together, "
-        "Your Business Name is here for you. We have multiple crews "
-        "ready to help. www.yourbusiness.com"
+        "College Bros Outdoor Services is here for you. We have multiple crews "
+        "ready to help. www.collegebrosllc.com"
     ),
 ]
 
@@ -77,20 +73,20 @@ RAIN_TEMPLATES = [
     (
         "All that rain hitting Monroe and West Monroe has to go somewhere. "
         "If your yard is holding water, you have got a drainage problem -- not "
-        "just a wet week. Your Business Name can assess your property "
-        "and fix the issue before it gets worse. www.yourbusiness.com"
+        "just a wet week. College Bros Outdoor Services can assess your property "
+        "and fix the issue before it gets worse. www.collegebrosllc.com"
     ),
     (
         "Standing water in your yard after heavy rain is not normal. It means "
-        "something needs attention. Your Business Name helps homeowners "
+        "something needs attention. College Bros Outdoor Services helps homeowners "
         "across Monroe and West Monroe solve drainage issues the right way. "
-        "Let us take a look. www.yourbusiness.com"
+        "Let us take a look. www.collegebrosllc.com"
     ),
     (
         "Another round of heavy rain across Monroe and West Monroe. If your lawn "
-        "looks more like a pond right now, Your Business Name can help "
+        "looks more like a pond right now, College Bros Outdoor Services can help "
         "with grading, drainage solutions, and cleanup. Our established team "
-        "handles it all. www.yourbusiness.com"
+        "handles it all. www.collegebrosllc.com"
     ),
 ]
 
@@ -98,42 +94,42 @@ FREEZE_TEMPLATES = [
     (
         "Freeze warnings are no joke for your property. If you are in Monroe "
         "or West Monroe and dealing with damage from the cold -- busted pipes, "
-        "broken branches, ice damage -- Your Business Name is ready "
-        "to help with the outdoor cleanup. www.yourbusiness.com"
+        "broken branches, ice damage -- College Bros Outdoor Services is ready "
+        "to help with the outdoor cleanup. www.collegebrosllc.com"
     ),
     (
         "When temperatures drop below freezing in Monroe and West Monroe, your "
         "landscaping takes a hit. Dead plants, cracked branches, and yard damage "
-        "add up fast. Your Business Name has an established team ready "
-        "to get your property cleaned up. www.yourbusiness.com"
+        "add up fast. College Bros Outdoor Services has an established team ready "
+        "to get your property cleaned up. www.collegebrosllc.com"
     ),
     (
         "Cold snap hitting Monroe and West Monroe hard. If the freeze left your "
-        "yard looking rough, Your Business Name can handle the cleanup. "
+        "yard looking rough, College Bros Outdoor Services can handle the cleanup. "
         "We have multiple crews and we are ready to work. "
-        "Reach out at www.yourbusiness.com"
+        "Reach out at www.collegebrosllc.com"
     ),
 ]
 
 HEAT_TEMPLATES = [
     (
         "This heat is brutal on lawns across Monroe and West Monroe. If your "
-        "grass is turning brown and your yard is struggling, Your Business "
+        "grass is turning brown and your yard is struggling, College Bros "
         "Outdoor Services can help you keep it alive. Proper mowing height, "
-        "care schedules, and real expertise. www.yourbusiness.com"
+        "care schedules, and real expertise. www.collegebrosllc.com"
     ),
     (
         "Triple-digit heat does not care about your lawn, but we do. College "
         "Bros Outdoor Services helps homeowners across Monroe and West Monroe "
         "protect their yards during the worst of summer. Our full team knows "
         "how to keep your property looking good even in this heat. "
-        "www.yourbusiness.com"
+        "www.collegebrosllc.com"
     ),
     (
         "Your lawn needs help right now. When it is this hot in Monroe and "
         "West Monroe, the wrong mowing schedule or cut height can kill your "
-        "grass fast. Your Business Name knows what your yard needs "
-        "to survive the summer. Let us handle it. www.yourbusiness.com"
+        "grass fast. College Bros Outdoor Services knows what your yard needs "
+        "to survive the summer. Let us handle it. www.collegebrosllc.com"
     ),
 ]
 
@@ -168,7 +164,7 @@ def log(msg: str):
 
 def fetch_json(url: str) -> dict:
     """Fetch JSON from a URL using only stdlib."""
-    req = Request(url, headers={"User-Agent": "YourBrandWeatherBot/1.0"})
+    req = Request(url, headers={"User-Agent": "CollegeBrosWeatherBot/1.0"})
     with urlopen(req, timeout=30) as resp:
         return json.loads(resp.read().decode())
 
@@ -360,7 +356,7 @@ def detect_triggers(weather: dict) -> list[str]:
 
 def main():
     log("=" * 60)
-    log("Your Business Weather Trigger System - Starting")
+    log("College Bros Weather Trigger System - Starting")
     log("=" * 60)
 
     # Load trigger log

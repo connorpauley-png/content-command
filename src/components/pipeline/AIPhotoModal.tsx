@@ -20,7 +20,7 @@ function generatePromptOptions(content: string): { label: string; prompt: string
       { label: 'Boat Vibes', prompt: 'casual phone photo, man on boat from behind, looking out at water, curly hair wind blown, golden hour, authentic' },
     )
   }
-  if (lc.includes('landscap') || lc.includes('lawn') || lc.includes('my business') || lc.includes('crew') || lc.includes('work')) {
+  if (lc.includes('landscap') || lc.includes('lawn') || lc.includes('college bros') || lc.includes('crew') || lc.includes('work')) {
     options.push(
       { label: 'Work Mode', prompt: 'iphone photo, man from behind walking toward work truck, job site, casual work clothes, authentic snapshot, morning light' },
       { label: 'On Site', prompt: 'casual phone photo, over shoulder shot of man looking at landscaping project, outdoor work setting, natural daylight, candid' },

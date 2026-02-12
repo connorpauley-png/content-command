@@ -2,7 +2,7 @@
 // Photo-first content generation
 // Scans CompanyCam, analyzes photos with vision AI, generates captions
 
-const COMPANYCAM_TOKEN = process.env.COMPANYCAM_TOKEN || process.env.COMPANYCAM_TOKEN!
+const COMPANYCAM_TOKEN = process.env.COMPANYCAM_TOKEN!
 const COMPANYCAM_BASE = 'https://api.companycam.com/v2'
 
 export type PhotoAnalysis = {
@@ -96,7 +96,7 @@ Evaluate and respond in JSON format:
   "quality": 1-10 rating for social media (10 = stunning transformation, 1 = blurry/unusable),
   "postType": one of ["before-after", "transformation", "crew", "satisfying", "tip", "testimonial", "equipment", "weather"],
   "platforms": ["instagram", "facebook"] - which platforms this photo works best for,
-  "caption": "A natural, friendly caption for Your Business. No emojis. Include (555) 000-0000 if appropriate. Voice: helpful neighbor who runs a great company.",
+  "caption": "A natural, friendly caption for College Bros Outdoor Services. No emojis. Include (318) 600-9123 if appropriate. Voice: helpful neighbor who runs a great company.",
   "hashtags": ["MonroeLA", "LawnCare", etc] - max 6, hyperlocal + service relevant
 }
 
@@ -133,8 +133,8 @@ Caption voice: friendly, real, no corporate speak, no emojis.`
       quality: 5,
       postType: 'transformation',
       platforms: ['instagram', 'facebook'],
-      caption: 'Another day, another yard transformed. Call us at (555) 000-0000.',
-      hashtags: ['MonroeLA', 'LawnCare', 'YourBrand'],
+      caption: 'Another day, another yard transformed. Call us at (318) 600-9123.',
+      hashtags: ['MonroeLA', 'LawnCare', 'CollegeBros'],
     }
   } catch (e) {
     console.error('Photo analysis failed:', e)
@@ -143,8 +143,8 @@ Caption voice: friendly, real, no corporate speak, no emojis.`
       quality: 5,
       postType: 'transformation',
       platforms: ['instagram', 'facebook'],
-      caption: 'Another day, another yard transformed. Call us at (555) 000-0000.',
-      hashtags: ['MonroeLA', 'LawnCare', 'YourBrand'],
+      caption: 'Another day, another yard transformed. Call us at (318) 600-9123.',
+      hashtags: ['MonroeLA', 'LawnCare', 'CollegeBros'],
     }
   }
 }

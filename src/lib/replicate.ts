@@ -1,5 +1,5 @@
 // Replicate API for Connor's LoRA image generation
-const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN || process.env.REPLICATE_API_TOKEN!
+const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN!
 
 // Connor's trained LoRA model (on Flux Dev)
 export const CONNOR_LORA_VERSION = 'f838ed705940a8553bee6ab2f9c88b46fb28e9ba5d647660f062c0afc5f51517'
@@ -114,11 +114,11 @@ export async function generateImage(options: GenerateImageOptions): Promise<stri
 // Prompt templates for common use cases
 export const PROMPT_TEMPLATES = {
   professional: (scene: string) => 
-    `a photo of SUBJECT_TOKEN, young man with short curly brown hair and faded sides, blue-green eyes, ${scene}, professional photography, natural lighting`,
+    `a photo of connorpauley, young man with short curly brown hair and faded sides, blue-green eyes, ${scene}, professional photography, natural lighting`,
   
   casual: (scene: string) =>
-    `a photo of SUBJECT_TOKEN, young man with short curly brown hair and faded sides, ${scene}, candid lifestyle photography, natural daylight`,
+    `a photo of connorpauley, young man with short curly brown hair and faded sides, ${scene}, candid lifestyle photography, natural daylight`,
   
   action: (activity: string) =>
-    `a photo of SUBJECT_TOKEN, young athletic man with short curly brown hair, ${activity}, action shot, outdoor setting`,
+    `a photo of connorpauley, young athletic man with short curly brown hair, ${activity}, action shot, outdoor setting`,
 }

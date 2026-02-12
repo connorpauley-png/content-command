@@ -9,10 +9,10 @@ import json
 from datetime import datetime
 from collections import defaultdict
 
-TOKEN = os.environ["COMPANYCAM_TOKEN"]
+TOKEN = os.environ.get("COMPANYCAM_TOKEN", "")
 API = "https://api.companycam.com/v2"
-SUPABASE_URL = "process.env.NEXT_PUBLIC_SUPABASE_URL"
-SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 
 # Tag IDs
 BEFORE_AND_AFTER_TAG = "16664744"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AI Image Enhancement for Social Media - Your Business Name
+AI Image Enhancement for Social Media - College Bros Outdoor Services
 Subtle, professional enhancement. NOT Instagram filters.
 
 Usage:

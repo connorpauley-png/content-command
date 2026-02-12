@@ -215,11 +215,11 @@ on conflict do nothing;
 
 -- Create College Bros organization as first tenant
 insert into ce_organizations (id, name, slug, industry, brand_voice, contact_phone, contact_email, website, plan) values
-  ('11111111-1111-1111-1111-111111111111', 'Example Business', 'example-biz', 'lawn_care', 'friendly', '(555) 000-0000', 'hello@example.com', 'example.com', 'pro')
+  ('11111111-1111-1111-1111-111111111111', 'College Bros Outdoor Services', 'collegebros', 'lawn_care', 'friendly', '(318) 600-9123', 'connorpauley@collegebrosllc.com', 'collegebrosllc.com', 'pro')
 on conflict (slug) do nothing;
 
 -- Add CompanyCam integration for College Bros
 insert into ce_integrations (org_id, type, category, name, credentials, status) values
   ('11111111-1111-1111-1111-111111111111', 'companycam', 'source', 'CompanyCam', 
-   '{"token": "YOUR_COMPANYCAM_TOKEN"}'::jsonb, 'active')
+   '{"token": "cNONxSpcbK5Q3n23xMLEWeOEZ-HVz_PO0ISeRBdqdCM"}'::jsonb, 'active')
 on conflict do nothing;

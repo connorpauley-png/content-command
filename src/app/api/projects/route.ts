@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const COMPANYCAM_TOKEN = process.env.COMPANYCAM_TOKEN || process.env.COMPANYCAM_TOKEN!;
+const COMPANYCAM_TOKEN = process.env.COMPANYCAM_TOKEN!;
 
 export async function GET(request: NextRequest) {
   try {

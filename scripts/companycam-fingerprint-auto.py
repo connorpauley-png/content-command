@@ -20,9 +20,9 @@ import requests
 from datetime import datetime
 from collections import defaultdict
 
-COMPANYCAM_TOKEN = os.environ["COMPANYCAM_TOKEN"]
-SUPABASE_URL = "process.env.NEXT_PUBLIC_SUPABASE_URL"
-SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+COMPANYCAM_TOKEN = os.environ.get("COMPANYCAM_TOKEN", "")
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 
 # Cache file for analyzed photos
 CACHE_FILE = os.path.join(os.path.dirname(__file__), ".photo_cache.json")

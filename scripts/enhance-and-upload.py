@@ -18,8 +18,8 @@ from urllib.request import urlopen, Request
 from urllib.parse import quote
 from PIL import Image, ImageEnhance, ImageOps
 
-SUPABASE_URL = "process.env.NEXT_PUBLIC_SUPABASE_URL"
-SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 BUCKET = "enhanced-photos"
 
 

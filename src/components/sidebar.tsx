@@ -41,7 +41,7 @@ export function Sidebar() {
           </div>
           <div>
             <h1 className="font-semibold text-sm">Content Command</h1>
-            <p className="text-xs text-gray-400">Your Business</p>
+            <p className="text-xs text-gray-400">College Bros LLC</p>
           </div>
         </div>
       </div>

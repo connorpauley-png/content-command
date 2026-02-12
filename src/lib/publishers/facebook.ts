@@ -1,6 +1,6 @@
 import { PublishResult } from './types'
 
-const PAGE_ID = process.env.FB_PAGE_ID || process.env.FB_PAGE_ID!
+const PAGE_ID = process.env.FB_PAGE_ID!
 const PAGE_TOKEN = process.env.FB_PAGE_TOKEN || ''
 
 export async function publishToFacebook(content: string, photoUrls: string[]): Promise<PublishResult> {

@@ -7,7 +7,7 @@ export type ValidationError = {
   severity: 'error' | 'warning'
 }
 
-const ENHANCED_PHOTO_PREFIX = 'process.env.NEXT_PUBLIC_SUPABASE_URL/storage/v1/object/public/enhanced-photos/'
+const ENHANCED_PHOTO_PREFIX = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/enhanced-photos/`
 
 // Emoji regex — only actual emoji, NOT typographic chars like em dash, bullet, arrows
 // Covers: emoticons, symbols, transport, flags, supplemental symbols
@@ -28,8 +28,8 @@ const UNAVAILABLE_PLATFORMS = ['gmb', 'nextdoor']
 const PLATFORM_NAMES: Record<string, string> = {
   x: 'X/Twitter',
   facebook: 'Facebook',
-  instagram: 'Instagram (Business)',
-  ig_personal: 'Instagram (@personal_brand)',
+  instagram: 'Instagram (@collegebros31)',
+  ig_personal: 'Instagram (@connorpauleyski)',
   linkedin: 'LinkedIn',
   gmb: 'Google Business',
   nextdoor: 'Nextdoor',

@@ -17,10 +17,10 @@ import requests
 from datetime import datetime
 
 # Get photo from CompanyCam and analyze it
-COMPANYCAM_TOKEN = os.environ["COMPANYCAM_TOKEN"]
+COMPANYCAM_TOKEN = os.environ.get("COMPANYCAM_TOKEN", "")
 COMPANYCAM_API = "https://api.companycam.com/v2"
-SUPABASE_URL = "process.env.NEXT_PUBLIC_SUPABASE_URL"
-SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 
 def log(msg: str):
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {msg}")

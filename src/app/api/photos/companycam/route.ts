@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const COMPANYCAM_TOKEN = process.env.COMPANYCAM_TOKEN || process.env.COMPANYCAM_TOKEN!
+const COMPANYCAM_TOKEN = process.env.COMPANYCAM_TOKEN!
 const COMPANYCAM_BASE = 'https://api.companycam.com/v2'
 
 // Single consolidated CompanyCam photos proxy

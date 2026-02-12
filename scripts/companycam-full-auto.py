@@ -17,10 +17,10 @@ from datetime import datetime
 from typing import Optional, List, Dict
 import random
 
-COMPANYCAM_TOKEN = os.environ["COMPANYCAM_TOKEN"]
+COMPANYCAM_TOKEN = os.environ.get("COMPANYCAM_TOKEN", "")
 COMPANYCAM_API = "https://api.companycam.com/v2"
-SUPABASE_URL = "process.env.NEXT_PUBLIC_SUPABASE_URL"
-SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 
 STATE_FILE = os.path.join(os.path.dirname(__file__), ".cc_auto_state.json")
 

@@ -18,8 +18,8 @@ export async function POST(request: NextRequest) {
         quality: 7,
         postType: 'transformation',
         platforms: ['instagram', 'facebook'],
-        caption: 'Another property looking fresh. This is what we do every day across your area. Call or text (555) 000-0000 if your yard needs some attention.',
-        hashtags: ['your areaLA', 'LawnCare', 'Landscaping', 'YourBrand'],
+        caption: 'Another property looking fresh. This is what we do every day across Monroe. Call or text (318) 600-9123 if your yard needs some attention.',
+        hashtags: ['MonroeLA', 'LawnCare', 'Landscaping', 'CollegeBros'],
       }),
     })
   }

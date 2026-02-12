@@ -1,79 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
-import { getContentHash, checkDuplicate } from '@/lib/dedup'
+import { NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const status = searchParams.get('status')
-  const from = searchParams.get('from')
-  const to = searchParams.get('to')
-  const limit = parseInt(searchParams.get('limit') || '50')
+// Posts are stored client-side in zustand/localStorage
+// These endpoints exist for future Supabase sync
 
-  let query = supabaseAdmin
-    .from('cc_posts')
-    .select('*')
-    .order('scheduled_at', { ascending: true, nullsFirst: false })
-    .limit(limit)
-
-  if (status) {
-    query = query.eq('status', status)
-  }
-  if (from) {
-    query = query.gte('scheduled_at', from)
-  }
-  if (to) {
-    query = query.lte('scheduled_at', to)
-  }
-
-  const { data, error } = await query
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-
-  return NextResponse.json(data)
+export async function GET() {
+  return NextResponse.json({ message: 'Posts are stored locally. Use Supabase sync for server-side storage.' })
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   const body = await request.json()
-  const content = body.content || ''
-  const platforms = body.platforms || []
+  // Future: sync to Supabase
+  return NextResponse.json({ success: true, post: body })
+}
 
-  // Check for duplicates unless explicitly skipped
-  if (!body.skip_dedup && content && platforms.length > 0) {
-    const dupCheck = await checkDuplicate(content, platforms)
-    if (dupCheck.isDuplicate) {
-      return NextResponse.json({
-        error: 'Duplicate content detected',
-        duplicate: {
-          type: dupCheck.matchType,
-          matchedPostId: dupCheck.matchedPostId,
-          matchedContent: dupCheck.matchedContent,
-          similarity: dupCheck.similarity,
-        },
-      }, { status: 409 })
-    }
-  }
+export async function PUT(request: Request) {
+  const body = await request.json()
+  return NextResponse.json({ success: true, post: body })
+}
 
-  const { data, error } = await supabaseAdmin
-    .from('cc_posts')
-    .insert({
-      content,
-      platforms,
-      scheduled_at: body.scheduled_at || null,
-      status: body.status || 'draft',
-      photo_urls: body.photo_urls || [],
-      posted_ids: body.posted_ids || {},
-      tags: body.tags || [],
-      notes: body.notes || null,
-      content_hash: content ? getContentHash(content) : null,
-    })
-    .select()
-    .single()
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-
-  return NextResponse.json(data, { status: 201 })
+export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const id = searchParams.get('id')
+  return NextResponse.json({ success: true, deleted: id })
 }

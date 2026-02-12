@@ -1,204 +1,103 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
-import { getCurrentOrg } from '@/lib/tenant'
-import { getTemplateById, fillTemplate, SYSTEM_TEMPLATES } from '@/lib/templates'
-
-// Lazy-load OpenAI only when needed
-async function getOpenAI() {
-  const OpenAI = (await import('openai')).default
-  return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY || '',
-  })
-}
+import { generateContent } from '@/lib/ai'
+import { CONNOR_PERSONAL_EXAMPLES, CONNOR_VOICE_GUIDE } from '@/lib/connor-examples'
+import type { AppConfig, Post } from '@/types'
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const { action } = body
-    
-    const org = getCurrentOrg()
+    const { config, accountId }: { config: AppConfig; accountId: string } = await req.json()
 
-    switch (action) {
-      case 'from_template': {
-        // Generate content from a template
-        const { templateId, variables, photoUrls } = body
-        
-        const template = getTemplateById(templateId)
-        if (!template) {
-          return NextResponse.json({ error: 'Template not found' }, { status: 404 })
-        }
-        
-        // If template has captionTemplate, use it directly
-        // Otherwise, use AI to generate from promptTemplate
-        let content: string
-        
-        if (template.captionTemplate) {
-          content = fillTemplate(template, variables || {})
-        } else if (process.env.OPENAI_API_KEY) {
-          // Use AI to generate only if key is configured
-          const prompt = fillTemplate(template, variables || {})
-          const openai = await getOpenAI()
-          
-          const completion = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
-            messages: [
-              {
-                role: 'system',
-                content: `You are a social media copywriter for a ${org.industry.replace('_', ' ')} business. 
-                         Brand voice: ${org.brandVoice}. 
-                         NEVER use emojis. 
-                         Keep it authentic and direct.`
-              },
-              { role: 'user', content: prompt }
-            ],
-            max_tokens: 300,
-            temperature: 0.7,
-          })
-          
-          content = completion.choices[0]?.message?.content || template.captionTemplate || ''
-        } else {
-          // Fallback to prompt template as content (user can edit)
-          content = fillTemplate(template, variables || {})
-        }
-        
-        // Remove any emojis that slipped through
-        content = content.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim()
-        
-        // Create draft post
-        const { data, error } = await supabaseAdmin
-          .from('cc_posts')
-          .insert({
-            content,
-            platforms: template.platforms,
-            status: template.settings.autoApproveEligible ? 'approved' : 'idea',
-            photo_urls: photoUrls || [],
-            photo_source: photoUrls?.length ? 'companycam' : null,
-            ai_generated: !template.captionTemplate,
-            posted_ids: {},
-            tags: [template.type, template.industry || 'general'],
-            notes: `Generated from template: ${template.name}`,
-          })
-          .select()
-          .single()
-        
-        if (error) throw error
-        
-        return NextResponse.json({ 
-          success: true, 
-          post: data,
-          template: template.name,
-          autoApproved: template.settings.autoApproveEligible 
-        })
-      }
-      
-      case 'from_photos': {
-        // Analyze photos and generate appropriate content
-        const { photoUrls, projectName, timeHours } = body
-        
-        if (!photoUrls?.length) {
-          return NextResponse.json({ error: 'No photos provided' }, { status: 400 })
-        }
-        
-        // Determine template based on photo count
-        const template = photoUrls.length >= 2 
-          ? getTemplateById('tpl-before-after')
-          : SYSTEM_TEMPLATES.find(t => t.type === 'transformation')
-        
-        if (!template) {
-          return NextResponse.json({ error: 'No suitable template' }, { status: 400 })
-        }
-        
-        const content = fillTemplate(template, {
-          hours: timeHours || 0,
-          projectName: projectName || '',
-        })
-        
-        const { data, error } = await supabaseAdmin
-          .from('cc_posts')
-          .insert({
-            content,
-            platforms: template.platforms,
-            status: 'idea',
-            photo_urls: photoUrls,
-            photo_source: 'companycam',
-            ai_generated: false,
-            posted_ids: {},
-            tags: ['before-after', 'transformation'],
-            notes: projectName ? `Project: ${projectName}` : 'Auto-generated from photos',
-          })
-          .select()
-          .single()
-        
-        if (error) throw error
-        
-        return NextResponse.json({ success: true, post: data })
-      }
-      
-      case 'from_voice': {
-        // Transcribe voice memo and generate content (placeholder)
-        // Would use Whisper API in production
-        return NextResponse.json({ error: 'Voice not yet implemented' }, { status: 501 })
-      }
-      
-      case 'bulk_from_ideas': {
-        // Generate multiple posts from a list of ideas
-        const { ideas } = body
-        
-        if (!ideas?.length) {
-          return NextResponse.json({ error: 'No ideas provided' }, { status: 400 })
-        }
-        
-        const posts = []
-        for (const idea of ideas) {
-          const { data, error } = await supabaseAdmin
-            .from('cc_posts')
-            .insert({
-              content: idea.content,
-              platforms: idea.platforms || ['instagram', 'facebook'],
-              status: 'idea',
-              photo_urls: idea.photoUrls || [],
-              photo_source: idea.photoUrls?.length ? 'companycam' : null,
-              ai_generated: true,
-              posted_ids: {},
-              tags: idea.tags || [],
-              notes: idea.notes || null,
-            })
-            .select()
-            .single()
-          
-          if (!error && data) {
-            posts.push(data)
-          }
-        }
-        
-        return NextResponse.json({ success: true, posts, count: posts.length })
-      }
-      
-      default:
-        return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
+    if (!config?.ai?.apiKey) {
+      return NextResponse.json({ error: 'AI not configured' }, { status: 400 })
     }
-  } catch (error) {
-    console.error('Generate error:', error)
-    return NextResponse.json({ 
-      error: 'Generation failed', 
-      details: error instanceof Error ? error.message : 'Unknown error' 
-    }, { status: 500 })
+
+    const account = config.accounts.find(a => a.id === accountId)
+    if (!account) {
+      return NextResponse.json({ error: 'Account not found' }, { status: 404 })
+    }
+
+    const biz = config.business
+    const strategy = config.strategy
+
+    const voice = (account.voiceOverride && account.voiceOverride.length > 0) ? account.voiceOverride.join(', ') : biz.brandVoice.join(', ')
+    const personalityContext = account.personality === 'personal'
+      ? 'This is a PERSONAL account. Write as the person behind the business — share stories, life updates, lessons, behind the scenes. Do NOT write promotional/business content.'
+      : account.personality === 'both'
+      ? 'This account mixes business and personal. Alternate between service-related posts and personal stories/updates.'
+      : 'This is a BUSINESS account. Focus on services, work examples, customer value, and driving leads.'
+
+    const systemPrompt = `You are a social media content creator. Generate a single post for ${account.platform}.
+
+${personalityContext}
+
+Business Context: ${biz.name} (${biz.industry})
+Location: ${biz.location.city}, ${biz.location.state}
+Services: ${biz.services.join(', ')}
+Target Audience: ${biz.targetAudience}
+USP: ${biz.usp}
+Voice/Tone: ${voice}
+${biz.contentRules.length > 0 ? `Content Rules: ${biz.contentRules.join('; ')}` : ''}
+
+Account: @${account.handle} on ${account.platform}
+Goal: ${account.goal}
+Personality: ${account.personality || 'business'}
+${account.contentDescription ? `Account Description: ${account.contentDescription}` : ''}
+${(account.sampleTopics && account.sampleTopics.length > 0) ? `Topics to post about: ${account.sampleTopics.join(', ')}` : ''}
+Content Types: ${account.contentTypes.join(', ')}
+Hashtag Strategy: ${account.hashtagStrategy}
+${strategy?.pillars?.length ? `Content Pillars: ${strategy.pillars.map(p => p.name).join(', ')}` : ''}
+
+${(account.personality === 'personal' || account.personality === 'both') ? (() => {
+      const examples = (account.examplePosts && account.examplePosts.length > 0) ? account.examplePosts : CONNOR_PERSONAL_EXAMPLES
+      return `${CONNOR_VOICE_GUIDE}
+
+REAL EXAMPLES OF THE VOICE TO MATCH (study these carefully):
+${examples.slice(0, 3).map((ex: string, i: number) => `Example ${i + 1}:\n"${ex}"`).join('\n\n')}
+
+CRITICAL: Match this exact voice and style. Do NOT make up events, storms, weather, or announcements. Do NOT use emojis. Do NOT reference specific days or dates — posts must be TIMELESS and work on any day. Write general reflections, lessons, and observations about the entrepreneurship journey.`
+    })() : ''}
+
+Respond ONLY with valid JSON (no markdown):
+{
+  "content": "the post text (platform-appropriate length and tone)",
+  "hashtags": ["hashtag1", "hashtag2"],
+  "suggestedTime": "HH:MM",
+  "imagePrompt": "description of ideal accompanying image",
+  "pillar": "content pillar name if applicable"
+}`
+
+    const result = await generateContent(config.ai, [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: `Generate a ${account.platform} post for @${account.handle}. Make it engaging and on-brand.\n\nCRITICAL REMINDERS:\n- This account's personality is "${account.personality || 'business'}" — generate content accordingly\n- ${account.contentDescription ? `This account is for: ${account.contentDescription}` : ''}\n- STRICTLY follow ALL content rules listed above. If a rule says "no emojis" then use ZERO emojis anywhere.` },
+    ])
+
+    let parsed: { content: string; hashtags?: string[]; suggestedTime?: string; imagePrompt?: string; pillar?: string }
+    try {
+      const jsonMatch = result.match(/\{[\s\S]*\}/)
+      parsed = JSON.parse(jsonMatch?.[0] || result)
+    } catch {
+      return NextResponse.json({ error: 'Failed to parse AI response', raw: result }, { status: 500 })
+    }
+
+    const post: Post = {
+      id: crypto.randomUUID(),
+      clientId: config.clientId,
+      accountId: account.id,
+      platform: account.platform,
+      status: 'idea',
+      content: parsed.content,
+      mediaUrls: [],
+      hashtags: parsed.hashtags || [],
+      scheduledAt: undefined,
+      aiGenerated: true,
+      pillar: parsed.pillar,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+
+    return NextResponse.json({ post, imagePrompt: parsed.imagePrompt })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
-}
-
-export async function GET(req: NextRequest) {
-  // Return available templates
-  const org = getCurrentOrg()
-  const templates = SYSTEM_TEMPLATES.filter(t => 
-    t.industry === null || t.industry === org.industry
-  )
-  
-  return NextResponse.json({ 
-    templates,
-    org: {
-      name: org.name,
-      industry: org.industry,
-      brandVoice: org.brandVoice,
-    }
-  })
 }

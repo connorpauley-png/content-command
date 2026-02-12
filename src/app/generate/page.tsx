@@ -1,398 +1,228 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Wand2, Image, Mic, FileText, Loader2, Check, ChevronRight } from 'lucide-react'
+import { useState } from 'react'
+import { useConfigStore, usePostsStore } from '@/lib/store/config'
+import { useClientStore } from '@/lib/store/clients'
+import { platformColors, platformIcons } from '@/lib/platform-colors'
+import type { Post } from '@/types'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Textarea } from '@/components/ui/textarea'
-import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import Link from 'next/link'
-
-interface Template {
-  id: string
-  name: string
-  description: string
-  type: string
-  platforms: string[]
-  settings: {
-    minPhotos: number
-    maxPhotos: number
-    autoApproveEligible: boolean
-  }
-  variables: Array<{
-    name: string
-    type: string
-    required: boolean
-    default?: string | number
-    options?: string[]
-  }>
-}
-
-interface CompanyCamPhoto {
-  id: string
-  url: string
-  project_id: string
-  project_name?: string
-}
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Sparkles, Loader2, Calendar, Kanban } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export default function GeneratePage() {
-  const [templates, setTemplates] = useState<Template[]>([])
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
-  const [variables, setVariables] = useState<Record<string, string>>({})
-  const [photos, setPhotos] = useState<CompanyCamPhoto[]>([])
-  const [selectedPhotos, setSelectedPhotos] = useState<string[]>([])
+  const { getConfig } = useConfigStore()
+  const { addPost } = usePostsStore()
+  const { currentClientId } = useClientStore()
+  const config = getConfig()
+  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([])
+  const [count, setCount] = useState('5')
+  // timeRange removed — scheduling handled by Fill button in pipeline
   const [loading, setLoading] = useState(false)
-  const [generating, setGenerating] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [error, setError] = useState('')
-  
-  // Custom content mode
-  const [mode, setMode] = useState<'template' | 'custom' | 'photos'>('template')
-  const [customContent, setCustomContent] = useState('')
-  const [customPlatforms, setCustomPlatforms] = useState<string[]>(['instagram', 'facebook'])
+  const [generatedPosts, setGeneratedPosts] = useState<Post[]>([])
+  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchTemplates()
-    fetchRecentPhotos()
-  }, [])
-
-  async function fetchTemplates() {
-    try {
-      const res = await fetch('/api/generate')
-      const data = await res.json()
-      setTemplates(data.templates || [])
-    } catch (e) {
-      console.error('Failed to fetch templates:', e)
-    }
-  }
-
-  async function fetchRecentPhotos() {
-    setLoading(true)
-    try {
-      const res = await fetch('/api/companycam/photos?limit=20')
-      const data = await res.json()
-      setPhotos(data.photos || [])
-    } catch (e) {
-      console.error('Failed to fetch photos:', e)
-    }
-    setLoading(false)
-  }
-
-  function togglePhoto(url: string) {
-    setSelectedPhotos(prev => 
-      prev.includes(url) ? prev.filter(p => p !== url) : [...prev, url]
+  const toggleAccount = (id: string) => {
+    setSelectedAccounts(prev =>
+      prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
     )
   }
 
-  async function handleGenerate() {
-    setGenerating(true)
-    setError('')
-    setSuccess(false)
+  const handleGenerate = async () => {
+    if (!config || selectedAccounts.length === 0) return
+    setLoading(true)
+    setError(null)
+    setGeneratedPosts([])
 
-    try {
-      let body: Record<string, unknown>
+    const postsPerAccount = Math.ceil(parseInt(count) / selectedAccounts.length)
+    const allPosts: Post[] = []
 
-      if (mode === 'template' && selectedTemplate) {
-        body = {
-          action: 'from_template',
-          templateId: selectedTemplate.id,
-          variables,
-          photoUrls: selectedPhotos,
+    for (const accountId of selectedAccounts) {
+      try {
+        const res = await fetch('/api/generate/batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            config,
+            accountId,
+            count: postsPerAccount,
+            timeRange: 'this_week',
+          }),
+        })
+        const data = await res.json()
+        if (data.error) {
+          setError(data.error)
+        } else {
+          allPosts.push(...data.posts)
         }
-      } else if (mode === 'photos') {
-        body = {
-          action: 'from_photos',
-          photoUrls: selectedPhotos,
-        }
-      } else {
-        body = {
-          action: 'bulk_from_ideas',
-          ideas: [{
-            content: customContent,
-            platforms: customPlatforms,
-            photoUrls: selectedPhotos,
-          }],
-        }
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Unknown error')
       }
-
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-
-      const data = await res.json()
-
-      if (data.success) {
-        setSuccess(true)
-        setCustomContent('')
-        setSelectedPhotos([])
-        setTimeout(() => setSuccess(false), 3000)
-      } else {
-        setError(data.error || 'Generation failed')
-      }
-    } catch (e) {
-      setError('Generation failed')
     }
 
-    setGenerating(false)
+    setGeneratedPosts(allPosts)
+    setLoading(false)
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Generate Content</h1>
-          <p className="text-gray-500 text-sm mt-1">Create posts from templates, photos, or scratch</p>
-        </div>
-        <Link href="/approve">
-          <Button variant="outline">
-            Review Queue <ChevronRight className="w-4 h-4 ml-1" />
+  const addToPipeline = () => {
+    if (!currentClientId) return
+    generatedPosts.forEach(post => addPost({ ...post, clientId: currentClientId, status: 'idea' }))
+    setGeneratedPosts([])
+  }
+
+  const addToScheduled = () => {
+    if (!currentClientId) return
+    generatedPosts.forEach(post => addPost({ ...post, clientId: currentClientId, status: 'scheduled', scheduledAt: undefined }))
+    setGeneratedPosts([])
+  }
+
+  if (!currentClientId || !config) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">No Client Selected</h2>
+          <p className="text-muted-foreground mb-4">
+            Please select a client from the sidebar or create a new one to generate content.
+          </p>
+          <Button asChild>
+            <a href="/clients">Manage Clients</a>
           </Button>
-        </Link>
+        </div>
+      </div>
+    )
+  }
+  
+  if (!config) {
+    return (
+      <div className="p-8 text-center text-muted-foreground">
+        <p>Complete setup first to generate content.</p>
+      </div>
+    )
+  }
+
+  const enabledAccounts = config.accounts.filter(a => a.enabled)
+
+  return (
+    <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <Sparkles className="h-8 w-8 text-primary" />
+          Generate Content
+        </h1>
+        <p className="text-muted-foreground mt-1">AI-powered content generation for your accounts</p>
       </div>
 
-      {/* Mode selector */}
-      <div className="flex gap-2">
-        <Button 
-          variant={mode === 'template' ? 'default' : 'outline'}
-          onClick={() => setMode('template')}
-        >
-          <FileText className="w-4 h-4 mr-2" /> From Template
-        </Button>
-        <Button 
-          variant={mode === 'photos' ? 'default' : 'outline'}
-          onClick={() => setMode('photos')}
-        >
-          <Image className="w-4 h-4 mr-2" /> From Photos
-        </Button>
-        <Button 
-          variant={mode === 'custom' ? 'default' : 'outline'}
-          onClick={() => setMode('custom')}
-        >
-          <Wand2 className="w-4 h-4 mr-2" /> Custom
-        </Button>
-      </div>
+      <Card className="p-6 space-y-6">
+        <div>
+          <Label className="text-base font-semibold mb-3 block">Select Accounts</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {enabledAccounts.map(acc => (
+              <div
+                key={acc.id}
+                onClick={() => toggleAccount(acc.id)}
+                className={cn(
+                  'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors',
+                  selectedAccounts.includes(acc.id)
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:bg-accent/50'
+                )}
+              >
+                <Checkbox checked={selectedAccounts.includes(acc.id)} />
+                <span className="text-lg">{platformIcons[acc.platform]}</span>
+                <div>
+                  <div className="font-medium text-sm">@{acc.handle}</div>
+                  <div className="text-xs text-muted-foreground capitalize">{acc.platform}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Template/Content selection */}
-        <div className="lg:col-span-2 space-y-4">
-          {mode === 'template' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Select Template</CardTitle>
-                <CardDescription>Pre-built formats that work</CardDescription>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {templates.map(template => (
-                  <button
-                    key={template.id}
-                    onClick={() => {
-                      setSelectedTemplate(template)
-                      // Set default values
-                      const defaults: Record<string, string> = {}
-                      template.variables.forEach(v => {
-                        if (v.default !== undefined) {
-                          defaults[v.name] = String(v.default)
-                        }
-                      })
-                      setVariables(defaults)
-                    }}
-                    className={`p-4 rounded-lg border text-left transition-all ${
-                      selectedTemplate?.id === template.id
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="font-medium text-gray-900">{template.name}</div>
-                    <div className="text-sm text-gray-500 mt-1">{template.description}</div>
-                    <div className="flex gap-1 mt-2 flex-wrap">
-                      {template.platforms.map(p => (
-                        <Badge key={p} variant="secondary" className="text-xs">{p}</Badge>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label>Number of Posts</Label>
+            <Select value={count} onValueChange={setCount}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1 post</SelectItem>
+                <SelectItem value="5">5 posts</SelectItem>
+                <SelectItem value="10">10 posts</SelectItem>
+                <SelectItem value="20">20 posts</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {/* Time range removed — scheduling handled by Fill button in pipeline */}
+        </div>
+
+        <Button
+          onClick={handleGenerate}
+          disabled={loading || selectedAccounts.length === 0}
+          className="w-full"
+          size="lg"
+        >
+          {loading ? (
+            <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...</>
+          ) : (
+            <><Sparkles className="h-4 w-4 mr-2" /> Generate {count} Posts</>
+          )}
+        </Button>
+
+        {error && (
+          <div className="text-sm text-red-500 bg-red-500/10 rounded-lg p-3">{error}</div>
+        )}
+      </Card>
+
+      {generatedPosts.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Generated Posts ({generatedPosts.length})</h2>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={addToPipeline}>
+                <Kanban className="h-4 w-4 mr-2" /> Add to Pipeline
+              </Button>
+              <Button onClick={addToScheduled}>
+                <Calendar className="h-4 w-4 mr-2" /> Add to Scheduled
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {generatedPosts.map(post => {
+              const acc = config.accounts.find(a => a.id === post.accountId)
+              const colors = platformColors[post.platform]
+              return (
+                <Card key={post.id} className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={cn('text-xs px-2 py-0.5 rounded', colors.pill)}>
+                      {platformIcons[post.platform]} {acc?.handle || post.platform}
+                    </span>
+                    {post.pillar && <Badge variant="outline">{post.pillar}</Badge>}
+                    {post.scheduledAt && (
+                      <span className="text-xs text-muted-foreground ml-auto">
+                        {new Date(post.scheduledAt).toLocaleDateString('en-US', {
+                          weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+                        })}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm whitespace-pre-wrap">{post.content}</p>
+                  {post.hashtags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {post.hashtags.map((tag, i) => (
+                        <span key={i} className="text-xs text-primary">#{tag.replace(/^#/, '')}</span>
                       ))}
                     </div>
-                    {template.settings.autoApproveEligible && (
-                      <Badge className="mt-2 bg-green-100 text-green-800 text-xs">Auto-approve eligible</Badge>
-                    )}
-                  </button>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {mode === 'template' && selectedTemplate && selectedTemplate.variables.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Template Variables</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {selectedTemplate.variables.map(v => (
-                  <div key={v.name}>
-                    <label className="text-sm font-medium text-gray-700 capitalize">
-                      {v.name.replace(/([A-Z])/g, ' $1')}
-                      {v.required && <span className="text-red-500">*</span>}
-                    </label>
-                    {v.type === 'select' && v.options ? (
-                      <Select 
-                        value={variables[v.name] || ''} 
-                        onValueChange={val => setVariables(prev => ({ ...prev, [v.name]: val }))}
-                      >
-                        <SelectTrigger className="mt-1">
-                          <SelectValue placeholder={`Select ${v.name}`} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {v.options.map(opt => (
-                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Input
-                        type={v.type === 'number' ? 'number' : 'text'}
-                        value={variables[v.name] || ''}
-                        onChange={e => setVariables(prev => ({ ...prev, [v.name]: e.target.value }))}
-                        className="mt-1"
-                        placeholder={v.default !== undefined ? String(v.default) : ''}
-                      />
-                    )}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {mode === 'custom' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Write Your Post</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Textarea
-                  value={customContent}
-                  onChange={e => setCustomContent(e.target.value)}
-                  placeholder="Write your post content here..."
-                  className="min-h-[150px]"
-                />
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Platforms</label>
-                  <div className="flex gap-2 mt-2 flex-wrap">
-                    {['instagram', 'facebook', 'x', 'linkedin', 'nextdoor'].map(p => (
-                      <button
-                        key={p}
-                        onClick={() => setCustomPlatforms(prev => 
-                          prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]
-                        )}
-                        className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                          customPlatforms.includes(p)
-                            ? 'bg-green-100 border-green-500 text-green-800'
-                            : 'border-gray-300 text-gray-600 hover:border-gray-400'
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {mode === 'photos' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Select Photos for Before/After</CardTitle>
-                <CardDescription>Pick 2 photos from the same project</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-500 mb-4">
-                  Select photos below, or they will be auto-detected as before/after based on timestamp.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+                  )}
+                </Card>
+              )
+            })}
+          </div>
         </div>
-
-        {/* Right: Photo picker */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>CompanyCam Photos</span>
-                <Button variant="ghost" size="sm" onClick={fetchRecentPhotos} disabled={loading}>
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Refresh'}
-                </Button>
-              </CardTitle>
-              <CardDescription>
-                {selectedPhotos.length} selected
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-2 max-h-[400px] overflow-y-auto">
-                {photos.map(photo => (
-                  <button
-                    key={photo.id}
-                    onClick={() => togglePhoto(photo.url)}
-                    className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                      selectedPhotos.includes(photo.url)
-                        ? 'border-green-500 ring-2 ring-green-200'
-                        : 'border-transparent hover:border-gray-300'
-                    }`}
-                  >
-                    <img
-                      src={photo.url}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                    {selectedPhotos.includes(photo.url) && (
-                      <div className="absolute top-1 right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                        <Check className="w-3 h-3 text-white" />
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Generate button */}
-          <Button 
-            className="w-full h-12 text-lg"
-            onClick={handleGenerate}
-            disabled={generating || (mode === 'template' && !selectedTemplate) || (mode === 'custom' && !customContent)}
-          >
-            {generating ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Generating...
-              </>
-            ) : success ? (
-              <>
-                <Check className="w-5 h-5 mr-2" />
-                Created!
-              </>
-            ) : (
-              <>
-                <Wand2 className="w-5 h-5 mr-2" />
-                Generate Post
-              </>
-            )}
-          </Button>
-
-          {error && (
-            <p className="text-sm text-red-500 text-center">{error}</p>
-          )}
-
-          {success && (
-            <Link href="/approve">
-              <Button variant="outline" className="w-full">
-                Review in Approval Queue
-              </Button>
-            </Link>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   )
 }

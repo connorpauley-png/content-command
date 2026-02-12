@@ -1,19 +1,24 @@
 'use client'
 
-export default function Error({ error, reset }: { error: Error; reset: () => void }) {
+import { useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  useEffect(() => {
+    console.error(error)
+  }, [error])
+
   return (
-    <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto', fontFamily: 'system-ui' }}>
-      <h1 style={{ color: '#dc2626' }}>Something went wrong</h1>
-      <p>This usually means your environment variables aren&apos;t set up yet.</p>
-      <h2>Quick Fix:</h2>
-      <ol>
-        <li>Copy <code>.env.example</code> to <code>.env.local</code></li>
-        <li>Fill in your Supabase URL, anon key, and service role key</li>
-        <li>Run the migration SQL in your Supabase SQL Editor</li>
-        <li>Restart the dev server: <code>npm run dev</code></li>
-      </ol>
-      <p style={{ color: '#666', fontSize: '0.9rem' }}>Error: {error.message}</p>
-      <button onClick={reset} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>Try Again</button>
+    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
+      <h2 className="text-2xl font-bold">Something went wrong</h2>
+      <p className="text-muted-foreground">{error.message || 'An unexpected error occurred'}</p>
+      <Button onClick={reset}>Try again</Button>
     </div>
   )
 }

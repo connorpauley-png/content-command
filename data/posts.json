@@ -1,0 +1,65 @@
+[
+  {
+    "id": "demo-1",
+    "accountId": "collegebros-ig",
+    "platform": "instagram",
+    "status": "idea",
+    "content": "Check out our latest landscaping transformation! Before and after shots from a recent residential project in Monroe. 🌿",
+    "mediaUrls": [],
+    "hashtags": ["#landscaping", "#beforeandafter", "#lawncare"],
+    "aiGenerated": false,
+    "createdAt": "2026-02-10T10:00:00Z",
+    "updatedAt": "2026-02-10T10:00:00Z"
+  },
+  {
+    "id": "demo-2",
+    "accountId": "collegebros-fb",
+    "platform": "facebook",
+    "status": "writing",
+    "content": "Spring is right around the corner! Now is the perfect time to schedule your lawn cleanup. Book early and save 15% on your first service.",
+    "mediaUrls": [],
+    "hashtags": ["#springcleanup", "#lawnservice"],
+    "aiGenerated": true,
+    "createdAt": "2026-02-09T14:00:00Z",
+    "updatedAt": "2026-02-10T08:00:00Z"
+  },
+  {
+    "id": "demo-3",
+    "accountId": "connor-ig",
+    "platform": "instagram",
+    "status": "review",
+    "content": "Building something from nothing hits different when you're 21. Here's what I've learned running a business while finishing college.",
+    "mediaUrls": ["https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400"],
+    "hashtags": ["#entrepreneur", "#youngfounder"],
+    "aiGenerated": false,
+    "createdAt": "2026-02-08T09:00:00Z",
+    "updatedAt": "2026-02-10T12:00:00Z"
+  },
+  {
+    "id": "demo-4",
+    "accountId": "collegebros-li",
+    "platform": "linkedin",
+    "status": "scheduled",
+    "content": "Excited to announce we're expanding our service area to cover all of Ouachita Parish! College Bros Outdoor is growing fast.",
+    "mediaUrls": [],
+    "hashtags": [],
+    "scheduledAt": "2026-02-12T09:00:00Z",
+    "aiGenerated": true,
+    "createdAt": "2026-02-07T16:00:00Z",
+    "updatedAt": "2026-02-10T11:00:00Z"
+  },
+  {
+    "id": "demo-5",
+    "accountId": "collegebros-fb",
+    "platform": "facebook",
+    "status": "posted",
+    "content": "Another happy customer! Thanks to the Johnson family for trusting us with their backyard renovation. Results speak for themselves 💪",
+    "mediaUrls": ["https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400"],
+    "hashtags": ["#customerreview", "#landscaping"],
+    "publishedAt": "2026-02-06T10:00:00Z",
+    "aiGenerated": false,
+    "publishResult": { "success": true, "platformPostId": "123456", "url": "https://facebook.com/post/123456" },
+    "createdAt": "2026-02-05T14:00:00Z",
+    "updatedAt": "2026-02-06T10:00:00Z"
+  }
+]

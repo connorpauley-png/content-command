@@ -1,67 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { promises as fs } from 'fs'
+import path from 'path'
+import type { Post } from '@/types'
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const { data, error } = await supabaseAdmin
-    .from('cc_posts')
-    .select('*')
-    .eq('id', params.id)
-    .single()
+const DATA_PATH = path.join(process.cwd(), 'data', 'posts.json')
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 404 })
-  }
-
-  return NextResponse.json(data)
+async function readPosts(): Promise<Post[]> {
+  const data = await fs.readFile(DATA_PATH, 'utf-8')
+  return JSON.parse(data)
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const body = await request.json()
-
-  // Only update fields that were actually provided in the request body
-  const updateFields: Record<string, unknown> = { updated_at: new Date().toISOString() }
-  const allowedFields = [
-    'content', 'platforms', 'scheduled_at', 'status', 'photo_urls',
-    'posted_ids', 'tags', 'notes', 'photo_source', 'ai_generated', 'content_hash'
-  ]
-  for (const field of allowedFields) {
-    if (field in body) {
-      updateFields[field] = body[field]
-    }
-  }
-
-  const { data, error } = await supabaseAdmin
-    .from('cc_posts')
-    .update(updateFields)
-    .eq('id', params.id)
-    .select()
-    .single()
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-
-  return NextResponse.json(data)
+async function writePosts(posts: Post[]): Promise<void> {
+  await fs.writeFile(DATA_PATH, JSON.stringify(posts, null, 2))
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const { error } = await supabaseAdmin
-    .from('cc_posts')
-    .delete()
-    .eq('id', params.id)
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const posts = await readPosts()
+  const post = posts.find(p => p.id === id)
+  if (!post) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  return NextResponse.json(post)
+}
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const body = await req.json()
+  const posts = await readPosts()
+  const idx = posts.findIndex(p => p.id === id)
+  if (idx === -1) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  posts[idx] = { ...posts[idx], ...body, id, updatedAt: new Date().toISOString() }
+  await writePosts(posts)
+  return NextResponse.json(posts[idx])
+}
 
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const posts = await readPosts()
+  const idx = posts.findIndex(p => p.id === id)
+  if (idx === -1) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  posts.splice(idx, 1)
+  await writePosts(posts)
   return NextResponse.json({ success: true })
 }

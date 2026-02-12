@@ -1,53 +1,59 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getIntegrations } from '@/lib/tenant'
+import { NextResponse } from 'next/server'
 
-const COMPANYCAM_API = 'https://api.companycam.com/v2'
+const API_TOKEN = process.env.COMPANYCAM_API_TOKEN || ''
+const BASE_URL = 'https://api.companycam.com/v2'
 
-export async function GET(req: NextRequest) {
-  const searchParams = req.nextUrl.searchParams
-  const limit = parseInt(searchParams.get('limit') || '20')
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
   const projectId = searchParams.get('project_id')
-  
-  // Get CompanyCam integration
-  const ccIntegration = getIntegrations('source').find(i => i.type === 'companycam')
-  if (!ccIntegration || !ccIntegration.credentials.token) {
-    return NextResponse.json({ error: 'CompanyCam not connected' }, { status: 400 })
-  }
-  
-  const token = ccIntegration.credentials.token
 
   try {
-    let url = `${COMPANYCAM_API}/photos?per_page=${limit}&sort=created_at`
+    let url = `${BASE_URL}/photos?per_page=30&sort=created_at`
     if (projectId) {
-      url = `${COMPANYCAM_API}/projects/${projectId}/photos?per_page=${limit}`
+      url = `${BASE_URL}/projects/${projectId}/photos?per_page=30&sort=created_at`
     }
 
     const res = await fetch(url, {
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: {
+        'Authorization': `Bearer ${API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
     })
-    
+
     if (!res.ok) {
-      throw new Error(`CompanyCam API error: ${res.status}`)
+      return NextResponse.json({ error: 'CompanyCam API error' }, { status: res.status })
     }
-    
+
     const photos = await res.json()
-    
-    // Transform to simpler format
-    const simplified = photos.map((p: any) => ({
-      id: p.id,
-      url: p.uris?.find((u: any) => u.type === 'original')?.uri || p.uris?.[0]?.uri,
-      thumbnail: p.uris?.find((u: any) => u.type === 'thumbnail')?.uri || p.uris?.[0]?.uri,
-      project_id: p.project_id,
-      captured_at: p.captured_at,
-      created_at: p.created_at,
-    }))
-    
-    return NextResponse.json({ photos: simplified })
+
+    // Also fetch projects for the filter dropdown
+    let projects: { id: string; name: string }[] = []
+    if (!projectId) {
+      try {
+        const projRes = await fetch(`${BASE_URL}/projects?per_page=50&sort=updated_at`, {
+          headers: {
+            'Authorization': `Bearer ${API_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+        })
+        if (projRes.ok) {
+          const projData = await projRes.json()
+          projects = projData.map((p: { id: string; name: string }) => ({ id: p.id, name: p.name }))
+        }
+      } catch { /* ignore */ }
+    }
+
+    return NextResponse.json({
+      photos: photos.map((p: { id: string; uris: Record<string, string>[]; created_at: string; project_id?: string }) => ({
+        id: p.id,
+        uri: p.uris?.[0]?.original_uri || p.uris?.[0]?.uri_base || '',
+        thumbnail: p.uris?.[0]?.uri_base ? `${p.uris[0].uri_base}?w=200&h=200` : p.uris?.[0]?.original_uri || '',
+        createdAt: p.created_at,
+        projectId: p.project_id,
+      })),
+      projects,
+    })
   } catch (error) {
-    console.error('CompanyCam error:', error)
-    return NextResponse.json({ 
-      error: 'Failed to fetch photos',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 })
   }
 }

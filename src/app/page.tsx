@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const [posts, setPosts] = useState<Post[]>([])
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
+  const [setupError, setSetupError] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -34,8 +35,9 @@ export default function DashboardPage() {
           const eventsData = await eventsRes.json()
           setEvents(Array.isArray(eventsData) ? eventsData : [])
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error('Failed to load dashboard data:', e)
+        setSetupError(e?.message || 'Failed to connect. Check your environment variables.')
       } finally {
         setLoading(false)
       }
@@ -55,6 +57,27 @@ export default function DashboardPage() {
   const publishedPosts = posts.filter((p) => p.status === 'posted')
 
   const platformById = (id: string) => PLATFORMS.find((p) => p.id === id)
+
+  if (setupError) {
+    return (
+      <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto', fontFamily: 'system-ui' }}>
+        <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🚀 Setup Required</h1>
+        <p style={{ color: '#666' }}>Content Command couldn&apos;t connect to your backend. Follow these steps to get started:</p>
+        <ol style={{ lineHeight: '2' }}>
+          <li>Copy <code>.env.example</code> to <code>.env.local</code> and fill in your API keys</li>
+          <li>Run the migration SQL in your Supabase SQL Editor</li>
+          <li>Restart the dev server: <code>npm run dev</code></li>
+        </ol>
+        <p style={{ marginTop: '1rem' }}>
+          📖 See the <a href="https://github.com/your-repo/content-command-v3#readme" style={{ color: '#254421', textDecoration: 'underline' }}>README</a> for full instructions.
+        </p>
+        <p style={{ color: '#999', fontSize: '0.8rem', marginTop: '1rem' }}>Error: {setupError}</p>
+        <button onClick={() => window.location.reload()} style={{ marginTop: '1rem', padding: '0.5rem 1rem', cursor: 'pointer', background: '#254421', color: 'white', border: 'none', borderRadius: '0.375rem' }}>
+          Retry
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">

@@ -3,6 +3,25 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
+function validateEnvVars() {
+  const missing: string[] = []
+  if (!supabaseUrl || supabaseUrl === 'your-supabase-url' || supabaseUrl === 'https://your-project.supabase.co') {
+    missing.push('NEXT_PUBLIC_SUPABASE_URL')
+  }
+  if (!supabaseKey || supabaseKey === 'your-anon-key') {
+    missing.push('NEXT_PUBLIC_SUPABASE_ANON_KEY')
+  }
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing environment variables: ${missing.join(', ')}. ` +
+      `Copy .env.example to .env.local and fill in your Supabase credentials. ` +
+      `See README.md for setup instructions.`
+    )
+  }
+}
+
+validateEnvVars()
+
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
 // Service role client for server-side operations

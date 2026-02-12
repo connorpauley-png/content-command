@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Content Command v3
 
-## Getting Started
+AI-powered social media content management for service businesses. Generate, schedule, and publish posts across Instagram, Facebook, LinkedIn, and Twitter/X — with CompanyCam integration for automatic job photo scoring.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Multi-platform publishing** — Instagram, Facebook, LinkedIn, Twitter/X
+- **AI content generation** — OpenAI-powered post writing with brand voice
+- **CompanyCam integration** — Auto-score job site photos for social media quality
+- **Multi-client support** — Manage multiple businesses from one dashboard
+- **Content calendar** — Visual scheduling and planning
+- **Setup wizard** — Guided onboarding for new clients
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework:** Next.js 14 (App Router)
+- **UI:** Tailwind CSS + shadcn/ui
+- **State:** Zustand (localStorage persistence)
+- **AI:** OpenAI GPT-4o
+- **Storage:** Supabase (image proxy)
+- **APIs:** Meta Graph API, LinkedIn API, Twitter API v2, CompanyCam API
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Setup
 
-## Learn More
+1. Clone the repo
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Copy `.env.example` to `.env.local` and fill in your API keys:
+   ```bash
+   cp .env.example .env.local
+   ```
+4. Run the dev server:
+   ```bash
+   npm run dev
+   ```
+5. Open [http://localhost:3000](http://localhost:3000) and complete the setup wizard.
 
-To learn more about Next.js, take a look at the following resources:
+## Environment Variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+See `.env.example` for all required variables. At minimum you need:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `OPENAI_API_KEY` — for AI content generation
+- `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` — for image proxy
+- Platform credentials for whichever social accounts you want to publish to
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Private — all rights reserved.

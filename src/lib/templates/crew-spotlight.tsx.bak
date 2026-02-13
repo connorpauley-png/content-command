@@ -1,0 +1,71 @@
+import { ReactElement } from 'react';
+
+interface CrewSpotlightData {
+  name: string;
+  role?: string;
+  achievement?: string;
+  funFact?: string;
+  brandColors?: { primary?: string; accent?: string; background?: string; text?: string };
+}
+
+export function CrewSpotlight(data: CrewSpotlightData): ReactElement {
+  const accent = data.brandColors?.accent || '#e2b93b';
+  const text = data.brandColors?.text || '#ffffff';
+  const primary = data.brandColors?.primary || '#254421';
+
+  return (
+    <div style={{ display: 'flex', position: 'relative', width: 1080, height: 1080, background: 'linear-gradient(145deg, #162112 0%, #0a0a0a 50%, #0f0f0f 100%)', overflow: 'hidden' }}>
+      {/* Large initial letter background */}
+      <div style={{ display: 'flex', position: 'absolute', top: -40, right: -20, fontSize: 600, fontWeight: 900, color: `${accent}06`, lineHeight: 1 }}>{data.name.charAt(0)}</div>
+      {/* Circle accent */}
+      <div style={{ display: 'flex', position: 'absolute', top: 120, right: 80, width: 200, height: 200, borderRadius: 100, background: `linear-gradient(135deg, ${primary}33, ${primary}00)` }} />
+      {/* Small accent circles */}
+      <div style={{ display: 'flex', position: 'absolute', bottom: 200, left: 60, width: 60, height: 60, borderRadius: 30, border: `2px solid ${accent}18` }} />
+      <div style={{ display: 'flex', position: 'absolute', bottom: 80, right: 120, width: 40, height: 40, borderRadius: 20, background: `${accent}12` }} />
+      {/* Top bar */}
+      <div style={{ display: 'flex', position: 'absolute', top: 0, left: 0, width: '100%', height: 6, background: `linear-gradient(90deg, ${accent}, ${primary}, ${accent}00)` }} />
+      {/* Content */}
+      <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', width: '100%', height: '100%', padding: 80, justifyContent: 'space-between' }}>
+        {/* Header label */}
+        <p style={{ display: 'flex', fontSize: 20, fontWeight: 700, color: `${accent}88`, letterSpacing: 8, textTransform: 'uppercase' as const }}>CREW SPOTLIGHT</p>
+        {/* Name and role */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 20 }}>
+          <p style={{ display: 'flex', fontSize: 72, fontWeight: 900, color: text, lineHeight: 1.1 }}>
+            {data.name}
+          </p>
+          {data.role && (
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <div style={{ display: 'flex', width: 40, height: 3, backgroundColor: accent, borderRadius: 2 }} />
+              <p style={{ display: 'flex', fontSize: 30, fontWeight: 700, color: accent, lineHeight: 1.3, textTransform: 'uppercase' as const, letterSpacing: 3 }}>
+                {data.role}
+              </p>
+            </div>
+          )}
+        </div>
+        {/* Info cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 30, flex: 1, justifyContent: 'center', marginTop: 40 }}>
+          {data.achievement && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, background: `linear-gradient(135deg, ${primary}22, ${primary}08)`, borderRadius: 16, border: `1px solid ${accent}15`, padding: 32 }}>
+              <p style={{ display: 'flex', fontSize: 18, fontWeight: 700, color: accent, letterSpacing: 4, textTransform: 'uppercase' as const }}>
+                ACHIEVEMENT
+              </p>
+              <p style={{ display: 'flex', fontSize: 30, fontWeight: 600, color: text, lineHeight: 1.4 }}>
+                {data.achievement}
+              </p>
+            </div>
+          )}
+          {data.funFact && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, background: `linear-gradient(135deg, ${accent}10, ${accent}04)`, borderRadius: 16, border: `1px solid ${accent}12`, padding: 32 }}>
+              <p style={{ display: 'flex', fontSize: 18, fontWeight: 700, color: `${accent}88`, letterSpacing: 4, textTransform: 'uppercase' as const }}>
+                FUN FACT
+              </p>
+              <p style={{ display: 'flex', fontSize: 30, fontWeight: 500, color: '#cccccc', lineHeight: 1.4 }}>
+                {data.funFact}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

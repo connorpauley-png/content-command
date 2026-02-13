@@ -7,10 +7,10 @@ export interface PublishResult {
   error?: string
 }
 
-const CONSUMER_KEY = 'IWPkesUgrpF9ZD8U0iHeovdBz'
-const CONSUMER_SECRET = 'qaD20jhRMbT2NQjOBD7h5lJAXHyiRDRYfenQCfO5yi5y8XLjtw'
-const ACCESS_TOKEN = '2020024514034171904-ZBdRbpY2W7ECsfDcDjrHvr6IEL1NBP'
-const ACCESS_TOKEN_SECRET = 'Q4JmVfY4BAuQsp6XZWGsqMTfnzIuDPuYOvsEajjYUjk9t'
+const CONSUMER_KEY = process.env.TWITTER_CONSUMER_KEY || ''
+const CONSUMER_SECRET = process.env.TWITTER_CONSUMER_SECRET || ''
+const ACCESS_TOKEN = process.env.TWITTER_ACCESS_TOKEN || ''
+const ACCESS_TOKEN_SECRET = process.env.TWITTER_ACCESS_TOKEN_SECRET || ''
 
 function percentEncode(str: string): string {
   return encodeURIComponent(str).replace(/[!'()*]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase())

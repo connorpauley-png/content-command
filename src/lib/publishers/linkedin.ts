@@ -5,8 +5,8 @@ export interface PublishResult {
   error?: string
 }
 
-const DEFAULT_ACCESS_TOKEN = 'AQUk70b8vQgF_Q3E3JtsUpjKVXGJWFBUO9mbf6Jp__3zdDddS3HkI3GEU4jOft61lygDid89-AZ7MElVK-GqJyleyCxgtkPZlGYB_3oqese9EJmrnZtq_o1zZsRGWzECmYkdp-QzEQqkXkO-7LM86JW4gtnzJ8CrDTNCB47B_IQ7Pws0KVRIhTgCTWBkG49yRllqpUKPAh991TSJ0x2GGZi-x86jqJf8nMgObSqJiazcZlkG_F-p1Ev6Dd-CbsR0TYC8ymg6cXymhsqgKuMAq8D1pNpGI_j_3Bf61vaENwFJLkeGG_Ly8Gl3xOuEsw1g_ouChwJYIKWhy3y6mxvempYGrXSMZQ'
-const DEFAULT_PERSON_URN = 'urn:li:person:jJKfkr1s3L'
+const DEFAULT_ACCESS_TOKEN = process.env.LINKEDIN_ACCESS_TOKEN || ''
+const DEFAULT_PERSON_URN = process.env.LINKEDIN_PERSON_URN || ''
 
 export async function publishToLinkedIn(
   text: string,

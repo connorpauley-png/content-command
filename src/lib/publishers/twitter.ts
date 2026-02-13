@@ -1,16 +1,6 @@
 import crypto from 'crypto'
-
-export interface PublishResult {
-  success: boolean
-  postId?: string
-  url?: string
-  error?: string
-}
-
-const CONSUMER_KEY = process.env.TWITTER_CONSUMER_KEY || ''
-const CONSUMER_SECRET = process.env.TWITTER_CONSUMER_SECRET || ''
-const ACCESS_TOKEN = process.env.TWITTER_ACCESS_TOKEN || ''
-const ACCESS_TOKEN_SECRET = process.env.TWITTER_ACCESS_TOKEN_SECRET || ''
+import type { Publisher, NormalizedPost, ConnectedAccount, ValidationResult, PlatformPayload, PublishResult } from './core/types'
+import { AuthError, RateLimitError } from './core/errors'
 
 function percentEncode(str: string): string {
   return encodeURIComponent(str).replace(/[!'()*]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase())
@@ -50,34 +40,35 @@ function buildOAuthHeader(
   return `OAuth ${headerParts}`
 }
 
-export async function publishToTwitter(
-  text: string,
-  mediaUrls?: string[],
-  options?: {
-    consumerKey?: string; consumerSecret?: string;
-    accessToken?: string; accessTokenSecret?: string;
-    dryRun?: boolean
+function getCreds(account: ConnectedAccount) {
+  return {
+    ck: account.metadata?.consumerKey || process.env.TWITTER_CONSUMER_KEY || '',
+    cs: account.metadata?.consumerSecret || process.env.TWITTER_CONSUMER_SECRET || '',
+    at: account.metadata?.accessToken || account.accessToken || process.env.TWITTER_ACCESS_TOKEN || '',
+    ats: account.metadata?.accessTokenSecret || process.env.TWITTER_ACCESS_TOKEN_SECRET || '',
   }
-): Promise<PublishResult> {
-  const ck = options?.consumerKey || CONSUMER_KEY
-  const cs = options?.consumerSecret || CONSUMER_SECRET
-  const at = options?.accessToken || ACCESS_TOKEN
-  const ats = options?.accessTokenSecret || ACCESS_TOKEN_SECRET
+}
 
-  if (options?.dryRun) {
-    return {
-      success: true,
-      postId: 'dry-run-twitter',
-      url: 'https://twitter.com/pauley_connor/status/dry-run',
-      error: undefined,
-    }
-  }
+export const twitterPublisher: Publisher = {
+  platform: 'twitter',
 
-  try {
-    let mediaId: string | null = null
+  async validate(post: NormalizedPost): Promise<ValidationResult> {
+    const errors: string[] = []
+    const text = post.variations?.twitter?.text || post.text
+    if (text.length > 280) errors.push(`Text too long: ${text.length}/280 chars`)
+    if (post.media.length > 4) errors.push(`Too many media: ${post.media.length}/4 max`)
+    return { valid: errors.length === 0, errors }
+  },
 
-    if (mediaUrls && mediaUrls.length > 0) {
-      const imgRes = await fetch(mediaUrls[0])
+  async preparePayload(post: NormalizedPost, account: ConnectedAccount): Promise<PlatformPayload> {
+    const { ck, cs, at, ats } = getCreds(account)
+    const text = post.variations?.twitter?.text || post.text
+    const tweetUrl = 'https://api.twitter.com/2/tweets'
+
+    // Upload media if present
+    let mediaIds: string[] = []
+    for (const media of post.media.slice(0, 4)) {
+      const imgRes = await fetch(media.url)
       const imgBuffer = Buffer.from(await imgRes.arrayBuffer())
       const base64 = imgBuffer.toString('base64')
       const uploadUrl = 'https://upload.twitter.com/1.1/media/upload.json'
@@ -89,32 +80,46 @@ export async function publishToTwitter(
         headers: { 'Authorization': authHeader, 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formBody.toString(),
       })
-      if (!uploadRes.ok) {
-        return { success: false, error: `Twitter media upload failed: ${await uploadRes.text()}` }
-      }
+      if (!uploadRes.ok) throw new Error(`Twitter media upload failed: ${await uploadRes.text()}`)
       const uploadData = await uploadRes.json()
-      mediaId = uploadData.media_id_string
+      mediaIds.push(uploadData.media_id_string)
     }
 
-    const tweetUrl = 'https://api.twitter.com/2/tweets'
-    const tweetBody: Record<string, unknown> = { text }
-    if (mediaId) tweetBody.media = { media_ids: [mediaId] }
+    const body: Record<string, unknown> = { text }
+    if (mediaIds.length > 0) body.media = { media_ids: mediaIds }
 
     const authHeader = buildOAuthHeader('POST', tweetUrl, ck, cs, at, ats)
-    const tweetRes = await fetch(tweetUrl, {
+    return {
+      platform: 'twitter',
+      url: tweetUrl,
       method: 'POST',
       headers: { 'Authorization': authHeader, 'Content-Type': 'application/json' },
-      body: JSON.stringify(tweetBody),
+      body,
+    }
+  },
+
+  async publish(payload: PlatformPayload, account: ConnectedAccount): Promise<PublishResult> {
+    const res = await fetch(payload.url, {
+      method: payload.method || 'POST',
+      headers: payload.headers,
+      body: JSON.stringify(payload.body),
     })
 
-    if (!tweetRes.ok) {
-      return { success: false, error: `Twitter post failed ${tweetRes.status}: ${await tweetRes.text()}` }
+    if (res.status === 401) throw new AuthError('twitter')
+    if (res.status === 429) throw new RateLimitError('twitter', parseInt(res.headers.get('retry-after') || '60') * 1000)
+
+    if (!res.ok) {
+      return { success: false, platform: 'twitter', error: `Twitter API ${res.status}: ${await res.text()}` }
     }
 
-    const tweetData = await tweetRes.json()
-    const id = tweetData.data?.id
-    return { success: true, postId: id, url: `https://twitter.com/pauley_connor/status/${id}` }
-  } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
-  }
+    const data = await res.json()
+    const id = data.data?.id
+    return {
+      success: true,
+      platform: 'twitter',
+      postId: id,
+      postUrl: `https://twitter.com/i/status/${id}`,
+      rawResponse: data,
+    }
+  },
 }

@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       const protocol = origin.startsWith('http') ? '' : 'http://'
       const renderUrl = `${protocol}${origin}/api/templates/render`
 
-      const template = (templateName || templateData.template || 'quote-card').replace(/_/g, '-')
+      const template = String(templateName || (templateData as Record<string, string>).template || 'quote-card').replace(/_/g, '-')
       const res = await fetch(renderUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

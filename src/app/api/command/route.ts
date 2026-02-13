@@ -6,14 +6,17 @@ import { execSync } from 'child_process'
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+function getSupabase() {
+  return createClient(SUPABASE_URL, SUPABASE_KEY)
+}
 
-const CRM_DB = '/Users/clawdbot/.openclaw/workspace/scripts/personal-crm/crm.db'
-const HEALTH_REPORT = '/Users/clawdbot/.openclaw/workspace/scripts/cron-monitor/health-report.json'
+const WORKSPACE = process.env.WORKSPACE_PATH || process.cwd()
+const CRM_DB = `${WORKSPACE}/scripts/personal-crm/crm.db`
+const HEALTH_REPORT = `${WORKSPACE}/scripts/cron-monitor/health-report.json`
 
 function querySqlite(query: string): string {
   try {
-    return execSync(`sqlite3 -json "${CRM_DB}" "${query}"`, { encoding: 'utf-8' })
+    return execSync(`sqlite3 -json "${CRM_DB}" "${query}"`, { encoding: 'utf-8', timeout: 10000 })
   } catch {
     return '[]'
   }
@@ -21,6 +24,8 @@ function querySqlite(query: string): string {
 
 export async function GET() {
   try {
+    const supabase = getSupabase()
+
     // Tasks from Supabase
     const { data: tasks } = await supabase
       .from('tasks')

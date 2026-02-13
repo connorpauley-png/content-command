@@ -39,6 +39,7 @@ export interface BusinessConfig {
   brandVoice: BrandVoice[]
   usp: string
   contentRules: string[]
+  brandColors?: { primary?: string; accent?: string; background?: string; text?: string }
 }
 
 export interface AIConfig {
@@ -134,7 +135,7 @@ export interface TemplateData {
   afterImage?: string
   items?: string[]  // for checklists
   comparison?: { left: string; right: string }  // for x_vs_y
-  brandColors?: { primary: string; accent: string }
+  brandColors?: { primary?: string; accent?: string; background?: string; text?: string }
 }
 
 export interface Post {

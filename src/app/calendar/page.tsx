@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useConfigStore, usePostsStore } from '@/lib/store/config'
 import { useClientStore } from '@/lib/store/clients'
 import { useScheduleStore } from '@/lib/store/schedule'
@@ -44,6 +44,7 @@ export default function CalendarPageV2() {
   const config = getConfig()
   const posts = getClientPosts()
 
+  const [mounted, setMounted] = useState(false)
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [filterAccount, setFilterAccount] = useState<string>('all')
@@ -52,6 +53,8 @@ export default function CalendarPageV2() {
   const [fillingGaps, setFillingGaps] = useState(false)
   const [newPost, setNewPost] = useState({ accountId: '', content: '', hashtags: '', scheduledAt: '' })
   const [tab, setTab] = useState<string>('calendar')
+
+  useEffect(() => { setMounted(true) }, [])
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
@@ -187,6 +190,8 @@ export default function CalendarPageV2() {
   for (let i = 0; i < firstDay; i++) calendarCells.push(null)
   for (let d = 1; d <= daysInMonth; d++) calendarCells.push(d)
   while (calendarCells.length % 7 !== 0) calendarCells.push(null)
+
+  if (!mounted) return null
 
   if (!currentClientId || !config) {
     return (

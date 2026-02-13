@@ -1,47 +1,100 @@
-import { htmlWrap, baseBg, headerBar, footerBar } from './html-base';
+import React from 'react'
+import { colors, fonts, typeScale, spacing } from './design-system'
+import type { TemplateData } from './quote-card'
 
-interface BeforeAfterData {
-  beforeLabel?: string;
-  afterLabel?: string;
-  beforeTitle?: string;
-  afterTitle?: string;
-  beforeDesc?: string;
-  afterDesc?: string;
-  description?: string;
-  brandColors?: { primary?: string; accent?: string; background?: string; text?: string; companyName?: string };
-}
+export function BeforeAfterElement(data: TemplateData): React.ReactNode {
+  const caption = (data.caption as string) || (data.headline as string) || ''
+  const brandName = (data.brandName as string) || (data.company as string) || ''
 
-export function BeforeAfter(data: BeforeAfterData): string {
-  const a = data.brandColors?.accent || '#e2b93b';
-  const co = data.brandColors?.companyName || 'COLLEGE BROS';
-  const beforeText = data.beforeLabel || data.beforeTitle || 'BEFORE';
-  const afterText = data.afterLabel || data.afterTitle || 'AFTER';
-  const desc = data.description || data.beforeDesc || '';
+  const labelStyle = {
+    fontSize: `${typeScale.caption}px`,
+    fontFamily: fonts.mono,
+    color: colors.gold,
+    letterSpacing: '4px',
+    textTransform: 'uppercase' as const,
+    marginBottom: `${spacing.xs}px`,
+  }
 
-  return htmlWrap(`
-<div style="position:relative;width:1080px;height:1080px;${baseBg()}overflow:hidden;">
-  <div style="position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:50px 60px;">
-    ${headerBar('TRANSFORMATION', co)}
-    <div style="flex:1;display:flex;position:relative;margin-top:30px;overflow:hidden;">
-      <!-- Left: Before -->
-      <div style="width:50%;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(200,60,60,0.06);border-radius:8px 0 0 8px;position:relative;">
-        <span style="font-family:'Inter',sans-serif;font-weight:800;font-size:18px;color:#CC4444;text-transform:uppercase;letter-spacing:5px;margin-bottom:20px;">✕</span>
-        <span style="font-family:'Playfair Display',serif;font-weight:900;font-size:72px;color:rgba(255,255,255,0.9);text-transform:uppercase;">${beforeText}</span>
-      </div>
-      <!-- Diagonal divider -->
-      <div style="position:absolute;left:50%;top:0;bottom:0;width:3px;background:linear-gradient(to bottom, rgba(255,255,255,0.0), rgba(255,255,255,0.3), rgba(255,255,255,0.0));transform:skewX(-3deg);z-index:3;"></div>
-      <!-- VS badge -->
-      <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:#0F1A14;border:2px solid ${a};display:flex;align-items:center;justify-content:center;z-index:4;">
-        <span style="font-family:'Inter',sans-serif;font-weight:800;font-size:16px;color:${a};">VS</span>
-      </div>
-      <!-- Right: After -->
-      <div style="width:50%;display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(13,53,24,0.3);border-radius:0 8px 8px 0;">
-        <span style="font-family:'Inter',sans-serif;font-weight:800;font-size:18px;color:${a};text-transform:uppercase;letter-spacing:5px;margin-bottom:20px;">✓</span>
-        <span style="font-family:'Playfair Display',serif;font-weight:900;font-size:72px;color:rgba(255,255,255,0.9);text-transform:uppercase;">${afterText}</span>
-      </div>
-    </div>
-    ${desc ? `<div style="margin-top:24px;margin-bottom:8px;"><p style="font-family:'Inter',sans-serif;font-weight:400;font-size:20px;color:#999999;line-height:1.5;">${desc}</p></div>` : ''}
-    ${footerBar(co)}
-  </div>
-</div>`);
+  const blockStyle = (color: string) => ({
+    display: 'flex' as const,
+    flex: 1,
+    flexDirection: 'column' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    backgroundColor: color,
+    borderRadius: '4px',
+  })
+
+  return React.createElement('div', {
+    style: {
+      display: 'flex',
+      flexDirection: 'column' as const,
+      width: '100%',
+      height: '100%',
+      backgroundColor: colors.bg,
+      padding: `${spacing.xl}px`,
+      fontFamily: fonts.body,
+    }
+  },
+    // Split area
+    React.createElement('div', {
+      style: {
+        display: 'flex',
+        flexDirection: 'row' as const,
+        flex: 1,
+        gap: '0px',
+      }
+    },
+      // Before
+      React.createElement('div', {
+        style: { display: 'flex', flexDirection: 'column' as const, flex: 1, marginRight: `${spacing.sm}px` }
+      },
+        React.createElement('div', { style: labelStyle }, 'BEFORE'),
+        React.createElement('div', { style: blockStyle('rgba(139, 69, 19, 0.3)') },
+          React.createElement('div', {
+            style: { fontSize: '48px', color: 'rgba(245,245,240,0.15)' }
+          }, '\u25A0')
+        ),
+      ),
+      // Gold divider
+      React.createElement('div', {
+        style: {
+          width: '2px',
+          backgroundColor: colors.gold,
+          marginTop: `${spacing.md}px`,
+          marginBottom: `${spacing.md}px`,
+        }
+      }),
+      // After
+      React.createElement('div', {
+        style: { display: 'flex', flexDirection: 'column' as const, flex: 1, marginLeft: `${spacing.sm}px` }
+      },
+        React.createElement('div', { style: labelStyle }, 'AFTER'),
+        React.createElement('div', { style: blockStyle('rgba(129, 199, 132, 0.15)') },
+          React.createElement('div', {
+            style: { fontSize: '48px', color: 'rgba(245,245,240,0.15)' }
+          }, '\u25A0')
+        ),
+      ),
+    ),
+    // Caption
+    caption ? React.createElement('div', {
+      style: {
+        fontSize: `${typeScale.body}px`,
+        color: colors.textMuted,
+        fontFamily: fonts.body,
+        marginTop: `${spacing.sm}px`,
+        textAlign: 'center' as const,
+      }
+    }, caption) : null,
+    brandName ? React.createElement('div', {
+      style: {
+        fontSize: '14px',
+        color: 'rgba(245,245,240,0.25)',
+        fontFamily: fonts.mono,
+        marginTop: `${spacing.xs}px`,
+        textAlign: 'center' as const,
+      }
+    }, brandName) : null,
+  )
 }

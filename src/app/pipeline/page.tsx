@@ -443,54 +443,42 @@ export default function PipelinePage() {
     const activePost = posts.find((p) => p.id === active.id)
     if (!activePost) return
 
-    // Dropped on a column
+    // Determine target status
+    let targetStatus: PostStatus | null = null
     const overData = over.data.current
     if (overData?.type === 'column') {
-      const newStatus = over.id as PostStatus
-      movePost(activePost.id, newStatus)
-      if (newStatus === 'needs_photos') {
-        setPhotoSourcePost({ ...activePost, status: newStatus })
+      targetStatus = over.id as PostStatus
+    } else {
+      const overPost = posts.find((p) => p.id === over.id)
+      if (overPost && activePost.status !== overPost.status) {
+        targetStatus = overPost.status
       }
-      if (newStatus === 'posted') {
-        publishPost(activePost.id)
-      }
-      return
     }
 
-    // Dropped on another post
-    const overPost = posts.find((p) => p.id === over.id)
-    if (overPost && activePost.status !== overPost.status) {
-      movePost(activePost.id, overPost.status)
-      if (overPost.status === 'needs_photos') {
-        setPhotoSourcePost({ ...activePost, status: overPost.status })
-      }
-      if (overPost.status === 'posted') {
-        publishPost(activePost.id)
-      }
+    if (!targetStatus || targetStatus === activePost.status) return
+
+    // Safety check: confirm before publishing or scheduling
+    if (targetStatus === 'posted') {
+      if (!confirm('Publish this post now? This will send it to the platform immediately.')) return
+    }
+    if (targetStatus === 'scheduled' && !activePost.scheduledAt) {
+      if (!confirm('Move to Scheduled? This post has no scheduled date yet.')) return
+    }
+
+    movePost(activePost.id, targetStatus)
+
+    if (targetStatus === 'needs_photos') {
+      setPhotoSourcePost({ ...activePost, status: targetStatus })
+    }
+    if (targetStatus === 'posted') {
+      publishPost(activePost.id)
     }
   }
 
-  const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event
-    if (!over) return
-
-    const activePost = posts.find((p) => p.id === active.id)
-    if (!activePost) return
-
-    // Check if over a column directly
-    const isOverColumn = columns.some((c) => c.id === over.id)
-    if (isOverColumn) {
-      if (activePost.status !== over.id) {
-        movePost(activePost.id, over.id as PostStatus)
-      }
-      return
-    }
-
-    // Over another post — move to that post's column
-    const overPost = posts.find((p) => p.id === over.id)
-    if (overPost && activePost.status !== overPost.status) {
-      movePost(activePost.id, overPost.status)
-    }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleDragOver = (_event: DragOverEvent) => {
+    // Visual feedback only — do NOT move posts during drag.
+    // The actual move happens in handleDragEnd.
   }
 
   const handleAddPost = (status: PostStatus) => {
@@ -1025,13 +1013,17 @@ export default function PipelinePage() {
                       onChange={async (e) => {
                         const files = e.target.files
                         if (!files) return
+                        const postId = editingPost.id
                         for (const file of Array.from(files)) {
                           const reader = new FileReader()
                           reader.onload = () => {
                             const dataUrl = reader.result as string
-                            const urls = [...editingPost.mediaUrls, dataUrl]
-                            setEditingPost((prev) => prev ? { ...prev, mediaUrls: urls } : prev)
-                            updatePost(editingPost.id, { mediaUrls: urls })
+                            setEditingPost((prev) => {
+                              if (!prev) return prev
+                              const updated = [...prev.mediaUrls, dataUrl]
+                              updatePost(postId, { mediaUrls: updated })
+                              return { ...prev, mediaUrls: updated }
+                            })
                           }
                           reader.readAsDataURL(file)
                         }

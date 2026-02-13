@@ -1,47 +1,64 @@
-export interface PublishResult {
-  success: boolean
-  postId?: string
-  url?: string
-  error?: string
-}
+import type { Publisher, NormalizedPost, ConnectedAccount, ValidationResult, PlatformPayload, PublishResult } from './core/types'
+import { AuthError, RateLimitError } from './core/errors'
 
-export async function publishToFacebook(
-  text: string,
-  pageId: string,
-  pageToken: string,
-  mediaUrls?: string[],
-  options?: { dryRun?: boolean }
-): Promise<PublishResult> {
-  if (options?.dryRun) {
-    return { success: true, postId: 'dry-run-facebook', url: `https://facebook.com/${pageId}/posts/dry-run` }
-  }
+export const facebookPublisher: Publisher = {
+  platform: 'facebook',
 
-  try {
-    let result: Record<string, unknown>
+  async validate(post: NormalizedPost): Promise<ValidationResult> {
+    const errors: string[] = []
+    const text = post.variations?.facebook?.text || post.text
+    if (!text || text.trim().length === 0) errors.push('Text content is required')
+    return { valid: errors.length === 0, errors }
+  },
 
-    if (mediaUrls && mediaUrls.length > 0) {
-      const res = await fetch(`https://graph.facebook.com/v21.0/${pageId}/photos`, {
+  async preparePayload(post: NormalizedPost, account: ConnectedAccount): Promise<PlatformPayload> {
+    const text = post.variations?.facebook?.text || post.text
+    const pageId = account.platformAccountId
+    const token = account.accessToken
+    const hasImages = post.media.some(m => m.type === 'image')
+
+    if (hasImages) {
+      return {
+        platform: 'facebook',
+        url: `https://graph.facebook.com/v21.0/${pageId}/photos`,
         method: 'POST',
+        body: { url: post.media[0].url, message: text, access_token: token },
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: mediaUrls[0], message: text, access_token: pageToken }),
-      })
-      result = await res.json()
-    } else {
-      const res = await fetch(`https://graph.facebook.com/v21.0/${pageId}/feed`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, access_token: pageToken }),
-      })
-      result = await res.json()
+      }
     }
 
-    if (result.error) {
-      return { success: false, error: (result.error as Record<string, string>).message }
+    return {
+      platform: 'facebook',
+      url: `https://graph.facebook.com/v21.0/${pageId}/feed`,
+      method: 'POST',
+      body: { message: text, access_token: token },
+      headers: { 'Content-Type': 'application/json' },
+    }
+  },
+
+  async publish(payload: PlatformPayload): Promise<PublishResult> {
+    const res = await fetch(payload.url, {
+      method: 'POST',
+      headers: payload.headers,
+      body: JSON.stringify(payload.body),
+    })
+
+    const data = await res.json()
+
+    if (res.status === 401 || data.error?.code === 190) throw new AuthError('facebook')
+    if (res.status === 429 || data.error?.code === 4) throw new RateLimitError('facebook')
+
+    if (data.error) {
+      return { success: false, platform: 'facebook', error: data.error.message, rawResponse: data }
     }
 
-    const id = (result.id || result.post_id) as string
-    return { success: true, postId: id, url: `https://facebook.com/${id}` }
-  } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
-  }
+    const id = data.id || data.post_id
+    return {
+      success: true,
+      platform: 'facebook',
+      postId: id,
+      postUrl: `https://facebook.com/${id}`,
+      rawResponse: data,
+    }
+  },
 }

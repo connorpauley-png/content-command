@@ -1,26 +1,85 @@
-import { htmlWrap, baseBg, headerBar, footerBar, textureDashes } from './html-base';
+import React from 'react'
+import { colors, fonts, typeScale, spacing } from './design-system'
 
-interface QuoteCardData {
-  quote: string;
-  author?: string;
-  brandColors?: { primary?: string; accent?: string; background?: string; text?: string; companyName?: string };
+export interface TemplateData {
+  quote?: string
+  author?: string
+  company?: string
+  brandName?: string
+  [key: string]: unknown
 }
 
-export function QuoteCard(data: QuoteCardData): string {
-  const co = data.brandColors?.companyName || 'COLLEGE BROS';
+export function QuoteCardElement(data: TemplateData): React.ReactNode {
+  const quote = data.quote || 'Quality is never an accident; it is always the result of intelligent effort.'
+  const author = data.author || ''
+  const company = data.company || data.brandName || ''
 
-  return htmlWrap(`
-<div style="position:relative;width:1080px;height:1080px;${baseBg()}overflow:hidden;">
-  ${textureDashes()}
-  <div style="position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:50px 60px;">
-    ${headerBar('DAILY MOTIVATION', co)}
-    <!-- Decorative quotation mark -->
-    <div style="position:absolute;top:100px;left:40px;font-family:'Playfair Display',serif;font-size:280px;color:rgba(255,255,255,0.04);line-height:1;pointer-events:none;z-index:1;">"</div>
-    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 0;position:relative;z-index:2;">
-      <p style="font-family:'Playfair Display',serif;font-weight:900;font-size:72px;color:#ffffff;line-height:1.1;max-width:960px;">${data.quote}</p>
-    </div>
-    ${data.author ? `<div style="margin-bottom:16px;"><div style="width:50px;height:2px;background:#e2b93b;margin-bottom:16px;"></div><span style="font-family:'Inter',sans-serif;font-weight:500;font-size:20px;color:#999999;">— ${data.author}</span></div>` : ''}
-    ${footerBar(co)}
-  </div>
-</div>`);
+  return React.createElement('div', {
+    style: {
+      display: 'flex',
+      flexDirection: 'column' as const,
+      justifyContent: 'center',
+      width: '100%',
+      height: '100%',
+      backgroundColor: colors.bg,
+      padding: `${spacing.xl}px`,
+      fontFamily: fonts.body,
+    }
+  },
+    React.createElement('div', {
+      style: {
+        display: 'flex',
+        flexDirection: 'row' as const,
+        alignItems: 'stretch',
+        flex: 1,
+      }
+    },
+      // Gold vertical line
+      React.createElement('div', {
+        style: {
+          width: '2px',
+          backgroundColor: colors.gold,
+          marginRight: `${spacing.md}px`,
+          marginTop: '20%',
+          marginBottom: '20%',
+        }
+      }),
+      // Quote content
+      React.createElement('div', {
+        style: {
+          display: 'flex',
+          flexDirection: 'column' as const,
+          justifyContent: 'center',
+          flex: 1,
+        }
+      },
+        React.createElement('div', {
+          style: {
+            fontSize: `${Math.min(56, Math.max(40, 2400 / quote.length))}px`,
+            fontFamily: fonts.headline,
+            color: colors.text,
+            lineHeight: 1.3,
+            marginBottom: `${spacing.md}px`,
+          }
+        }, `\u201C${quote}\u201D`),
+        author ? React.createElement('div', {
+          style: {
+            fontSize: `${typeScale.caption}px`,
+            fontFamily: fonts.mono,
+            color: colors.textMuted,
+            letterSpacing: '3px',
+            textTransform: 'uppercase' as const,
+            marginBottom: `${spacing.xs}px`,
+          }
+        }, `\u2014 ${author}`) : null,
+        company ? React.createElement('div', {
+          style: {
+            fontSize: '14px',
+            fontFamily: fonts.mono,
+            color: 'rgba(245, 245, 240, 0.3)',
+          }
+        }, company) : null,
+      )
+    )
+  )
 }

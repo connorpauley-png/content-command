@@ -1,105 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { orchestratePublish } from '@/lib/publishers/orchestrator'
 import { ensurePublicUrl } from '@/lib/image-proxy'
+import type { NormalizedPost, ConnectedAccount } from '@/lib/publishers/core/types'
 
 export async function POST(req: NextRequest) {
   try {
-    const { post, account, dryRun } = await req.json()
+    const { post, accounts, dryRun } = await req.json()
 
-    if (!post || !account) {
-      return NextResponse.json({ success: false, error: 'Missing post or account' })
+    if (!post || !accounts || !Array.isArray(accounts) || accounts.length === 0) {
+      return NextResponse.json({ success: false, error: 'Missing post or accounts array' }, { status: 400 })
     }
 
+    // Build NormalizedPost
+    const text = post.content + (post.hashtags?.length
+      ? '\n\n' + post.hashtags.map((t: string) => `#${t}`).join(' ')
+      : '')
+
+    const rawUrls: string[] = post.mediaUrls || []
+    const publicUrls = await Promise.all(rawUrls.map((url: string) => ensurePublicUrl(url)))
+
+    const normalizedPost: NormalizedPost = {
+      id: post.id || `post-${Date.now()}`,
+      text,
+      variations: post.variations || undefined,
+      media: publicUrls.map((url: string) => ({ url, type: 'image' as const })),
+      scheduling: null,
+      metadata: { generatedBy: post.generatedBy || 'manual' },
+    }
+
+    // Build ConnectedAccounts
+    const connectedAccounts: ConnectedAccount[] = accounts.map((a: any) => ({
+      platform: a.platform,
+      accountType: a.accountType || 'personal',
+      accessToken: a.credentials?.accessToken || a.credentials?.pageToken || '',
+      platformAccountId: a.credentials?.pageId || a.credentials?.igAccountId || a.credentials?.businessAccountId || a.platformAccountId || '',
+      metadata: a.credentials || {},
+    }))
+
     if (dryRun) {
-      const content = post.content + (post.hashtags?.length ? '\n\n' + post.hashtags.map((t: string) => `#${t}`).join(' ') : '')
       return NextResponse.json({
         success: true,
         dryRun: true,
-        platformPostId: `dry-run-${account.platform}-${Date.now()}`,
         wouldPublish: {
-          platform: account.platform,
-          content,
-          mediaUrls: post.mediaUrls || [],
-          account: account.handle,
+          post: normalizedPost,
+          platforms: connectedAccounts.map(a => a.platform),
         },
       })
     }
 
-    const content = post.content + (post.hashtags?.length ? '\n\n' + post.hashtags.map((t: string) => `#${t}`).join(' ') : '')
-    
-    // Ensure all image URLs are publicly accessible (re-uploads Astria/private URLs to Supabase)
-    const rawUrls = post.mediaUrls || []
-    const mediaUrls = await Promise.all(rawUrls.map((url: string) => ensurePublicUrl(url)))
-    const creds = account.credentials || {}
-    const origin = req.nextUrl.origin
-
-    let result: { success: boolean; platformPostId?: string; error?: string }
-
-    switch (account.platform) {
-      case 'instagram': {
-        const res = await fetch(`${origin}/api/publish/instagram`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content,
-            mediaUrls,
-            igAccountId: creds.igAccountId || creds.businessAccountId,
-            pageToken: creds.pageToken || creds.accessToken,
-          }),
-        })
-        result = await res.json()
-        break
-      }
-      case 'facebook': {
-        const res = await fetch(`${origin}/api/publish/facebook`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content,
-            mediaUrls,
-            pageId: creds.pageId,
-            pageToken: creds.pageToken || creds.accessToken,
-          }),
-        })
-        result = await res.json()
-        break
-      }
-      case 'linkedin': {
-        const res = await fetch(`${origin}/api/publish/linkedin`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content,
-            mediaUrls,
-            accessToken: creds.accessToken,
-            personUrn: creds.personUrn,
-          }),
-        })
-        result = await res.json()
-        break
-      }
-      case 'twitter': {
-        const res = await fetch(`${origin}/api/publish/twitter`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content,
-            mediaUrls,
-            consumerKey: creds.consumerKey || creds.apiKey,
-            consumerSecret: creds.consumerSecret || creds.apiSecret,
-            accessToken: creds.accessToken,
-            accessTokenSecret: creds.accessTokenSecret,
-          }),
-        })
-        result = await res.json()
-        break
-      }
-      default:
-        result = { success: false, error: `Unsupported platform: ${account.platform}` }
-    }
-
+    const result = await orchestratePublish(normalizedPost, connectedAccounts)
     return NextResponse.json(result)
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ success: false, error: message })
+    return NextResponse.json({ success: false, error: message }, { status: 500 })
   }
 }

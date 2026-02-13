@@ -6,9 +6,11 @@ import type { AppConfig, Post } from '@/types'
 const COLLEGE_BROS_CLIENT_ID = 'college-bros-default'
 
 export function migrateToMultiTenant() {
+  if (typeof window === 'undefined') return
+
   // Check if migration has already run
   const migrationKey = 'content-command-migration-v1'
-  if (typeof window !== 'undefined' && localStorage.getItem(migrationKey)) {
+  if (localStorage.getItem(migrationKey)) {
     return
   }
 
@@ -73,10 +75,8 @@ export function migrateToMultiTenant() {
     }
 
     // Mark migration as complete
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(migrationKey, 'completed')
-      console.log('✅ Migration to multi-tenant structure completed')
-    }
+    localStorage.setItem(migrationKey, 'completed')
+    console.log('✅ Migration to multi-tenant structure completed')
   } catch (error) {
     console.error('❌ Migration failed:', error)
   }

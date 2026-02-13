@@ -1,88 +1,78 @@
-export interface PublishResult {
-  success: boolean
-  postId?: string
-  url?: string
-  error?: string
-}
+import type { Publisher, NormalizedPost, ConnectedAccount, ValidationResult, PlatformPayload, PublishResult } from './core/types'
+import { AuthError, RateLimitError } from './core/errors'
 
-const DEFAULT_ACCESS_TOKEN = process.env.LINKEDIN_ACCESS_TOKEN || ''
-const DEFAULT_PERSON_URN = process.env.LINKEDIN_PERSON_URN || ''
+export const linkedinPublisher: Publisher = {
+  platform: 'linkedin',
 
-export async function publishToLinkedIn(
-  text: string,
-  mediaUrls?: string[],
-  options?: { accessToken?: string; personUrn?: string; dryRun?: boolean }
-): Promise<PublishResult> {
-  const accessToken = options?.accessToken || DEFAULT_ACCESS_TOKEN
-  const personUrn = options?.personUrn || DEFAULT_PERSON_URN
+  async validate(post: NormalizedPost): Promise<ValidationResult> {
+    const errors: string[] = []
+    const text = post.variations?.linkedin?.text || post.text
+    if (text.length > 3000) errors.push(`Text too long: ${text.length}/3000 chars`)
+    return { valid: errors.length === 0, errors }
+  },
 
-  if (options?.dryRun) {
-    return { success: true, postId: 'dry-run-linkedin', url: 'https://linkedin.com/feed/dry-run' }
-  }
+  async preparePayload(post: NormalizedPost, account: ConnectedAccount): Promise<PlatformPayload> {
+    const text = post.variations?.linkedin?.text || post.text
+    const accessToken = account.accessToken || process.env.LINKEDIN_ACCESS_TOKEN || ''
+    const personUrn = account.metadata?.personUrn || process.env.LINKEDIN_PERSON_URN || ''
+    const authorUrn = personUrn.startsWith('urn:') ? personUrn : `urn:li:person:${personUrn}`
 
-  try {
-    const headers: Record<string, string> = {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      'X-Restli-Protocol-Version': '2.0.0',
-    }
-
-    let mediaAsset: string | null = null
-
-    if (mediaUrls && mediaUrls.length > 0) {
-      const registerRes = await fetch('https://api.linkedin.com/v2/assets?action=registerUpload', {
-        method: 'POST', headers,
-        body: JSON.stringify({
-          registerUploadRequest: {
-            recipes: ['urn:li:digitalmediaRecipe:feedshare-image'],
-            owner: personUrn,
-            serviceRelationships: [{ relationshipType: 'OWNER', identifier: 'urn:li:userGeneratedContent' }],
-          },
-        }),
-      })
-      const registerData = await registerRes.json()
-      if (!registerData.value) {
-        return { success: false, error: 'Failed to register LinkedIn upload: ' + JSON.stringify(registerData) }
-      }
-      const uploadUrl = registerData.value.uploadMechanism['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest'].uploadUrl
-      mediaAsset = registerData.value.asset
-
-      const imageRes = await fetch(mediaUrls[0])
-      const imageBuffer = await imageRes.arrayBuffer()
-      const uploadRes = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/octet-stream' },
-        body: imageBuffer,
-      })
-      if (!uploadRes.ok) {
-        return { success: false, error: 'Failed to upload image to LinkedIn' }
-      }
-    }
-
-    const postBody = {
-      author: personUrn,
-      lifecycleState: 'PUBLISHED',
-      specificContent: {
-        'com.linkedin.ugc.ShareContent': {
-          shareCommentary: { text },
-          shareMediaCategory: mediaAsset ? 'IMAGE' : 'NONE',
-          ...(mediaAsset ? { media: [{ status: 'READY', media: mediaAsset }] } : {}),
-        },
+    const body: Record<string, unknown> = {
+      author: authorUrn,
+      commentary: text,
+      visibility: 'PUBLIC',
+      distribution: {
+        feedDistribution: 'MAIN_FEED',
+        targetEntities: [],
+        thirdPartyDistributionChannels: [],
       },
-      visibility: { 'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC' },
+      lifecycleState: 'PUBLISHED',
     }
 
-    const postRes = await fetch('https://api.linkedin.com/v2/ugcPosts', {
-      method: 'POST', headers, body: JSON.stringify(postBody),
+    // Add image if present (requires pre-uploaded asset — for now text-only via Posts API)
+    if (post.media.length > 0) {
+      body.content = {
+        media: {
+          altText: text.slice(0, 100),
+          id: post.media[0].url, // Assumes pre-registered asset URN
+        },
+      }
+    }
+
+    return {
+      platform: 'linkedin',
+      url: 'https://api.linkedin.com/rest/posts',
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        'LinkedIn-Version': '202401',
+        'X-Restli-Protocol-Version': '2.0.0',
+      },
+      body,
+    }
+  },
+
+  async publish(payload: PlatformPayload): Promise<PublishResult> {
+    const res = await fetch(payload.url, {
+      method: 'POST',
+      headers: payload.headers,
+      body: JSON.stringify(payload.body),
     })
 
-    if (!postRes.ok) {
-      return { success: false, error: `LinkedIn API error ${postRes.status}: ${await postRes.text()}` }
+    if (res.status === 401) throw new AuthError('linkedin')
+    if (res.status === 429) throw new RateLimitError('linkedin')
+
+    if (!res.ok) {
+      return { success: false, platform: 'linkedin', error: `LinkedIn API ${res.status}: ${await res.text()}` }
     }
 
-    const postId = postRes.headers.get('x-restli-id') || 'unknown'
-    return { success: true, postId, url: `https://linkedin.com/feed/update/${postId}` }
-  } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' }
-  }
+    const postId = res.headers.get('x-restli-id') || res.headers.get('x-linkedin-id') || 'unknown'
+    return {
+      success: true,
+      platform: 'linkedin',
+      postId,
+      postUrl: `https://linkedin.com/feed/update/${postId}`,
+    }
+  },
 }

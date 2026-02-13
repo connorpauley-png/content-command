@@ -1,55 +1,88 @@
-import { htmlWrap, baseBg, headerBar, footerBar, textureDashes } from './html-base';
+import React from 'react'
+import { colors, fonts, typeScale, spacing } from './design-system'
+import type { TemplateData } from './quote-card'
 
-interface FlyerData {
-  headline: string;
-  subheadline?: string;
-  details?: string | string[];
-  cta?: string;
-  brandColors?: { primary?: string; accent?: string; background?: string; text?: string; companyName?: string };
-}
+export function FlyerElement(data: TemplateData): React.ReactNode {
+  const headline = (data.headline as string) || (data.title as string) || 'SPRING SPECIAL'
+  const subtext = (data.subtext as string) || (data.description as string) || '20% off all services this month'
+  const cta = (data.cta as string) || 'BOOK NOW'
+  const brandName = (data.brandName as string) || (data.company as string) || ''
 
-export function Flyer(data: FlyerData): string {
-  const a = data.brandColors?.accent || '#e2b93b';
-  const co = data.brandColors?.companyName || 'COLLEGE BROS';
-
-  // Handle details as string or array
-  let detailItems: string[] = [];
-  if (Array.isArray(data.details)) {
-    detailItems = data.details;
-  } else if (typeof data.details === 'string' && data.details) {
-    detailItems = data.details.split(',').map(s => s.trim()).filter(Boolean);
-    if (detailItems.length === 1) detailItems = [data.details as string];
-  }
-
-  const rows = detailItems.map((item, i) => `
-    <div style="display:flex;align-items:center;gap:20px;padding:18px 0;${i < detailItems.length - 1 ? 'border-bottom:1px solid rgba(255,255,255,0.08);' : ''}">
-      <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:16px;color:${a};flex-shrink:0;">→</span>
-      <span style="font-family:'Inter',sans-serif;font-weight:500;font-size:24px;color:#ffffff;">${item}</span>
-    </div>`).join('');
-
-  // If details is a single string (not split into array), show as paragraph
-  const detailBlock = detailItems.length > 0 ? rows :
-    (data.details ? `<p style="font-family:'Inter',sans-serif;font-weight:400;font-size:22px;color:#cccccc;line-height:1.6;padding:20px 0;">${data.details}</p>` : '');
-
-  return htmlWrap(`
-<div style="position:relative;width:1080px;height:1080px;${baseBg()}overflow:hidden;">
-  ${textureDashes()}
-  <div style="position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:50px 60px;">
-    ${headerBar('SPECIAL OFFER', co)}
-    <div style="margin-top:50px;">
-      <h1 style="font-family:'Playfair Display',serif;font-weight:900;font-size:72px;color:#ffffff;line-height:1.05;">${data.headline}</h1>
-      ${data.subheadline ? `<p style="font-family:'Inter',sans-serif;font-weight:400;font-size:24px;color:#bbbbbb;margin-top:24px;line-height:1.4;">${data.subheadline}</p>` : ''}
-    </div>
-    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
-      ${detailBlock}
-    </div>
-    ${data.cta ? `
-    <div style="margin-bottom:16px;">
-      <div style="display:inline-block;background:${a};padding:20px 40px;">
-        <span style="font-family:'Inter',sans-serif;font-weight:800;font-size:24px;color:#0F1A14;letter-spacing:1px;">${data.cta}</span>
-      </div>
-    </div>` : ''}
-    ${footerBar(co)}
-  </div>
-</div>`);
+  return React.createElement('div', {
+    style: {
+      display: 'flex',
+      flexDirection: 'column' as const,
+      width: '100%',
+      height: '100%',
+      backgroundColor: colors.bg,
+      padding: `${spacing.xl}px`,
+      fontFamily: fonts.body,
+      justifyContent: 'space-between',
+    }
+  },
+    // Top section
+    React.createElement('div', {
+      style: { display: 'flex', flexDirection: 'column' as const }
+    },
+      brandName ? React.createElement('div', {
+        style: {
+          fontSize: `${typeScale.caption}px`,
+          fontFamily: fonts.mono,
+          color: colors.textMuted,
+          letterSpacing: '3px',
+          textTransform: 'uppercase' as const,
+          marginBottom: `${spacing.md}px`,
+        }
+      }, brandName) : null,
+    ),
+    // Center content
+    React.createElement('div', {
+      style: {
+        display: 'flex',
+        flexDirection: 'column' as const,
+        justifyContent: 'center',
+        flex: 1,
+      }
+    },
+      React.createElement('div', {
+        style: {
+          fontSize: `${typeScale.hero}px`,
+          fontFamily: fonts.headline,
+          color: colors.gold,
+          lineHeight: 1.1,
+          marginBottom: `${spacing.md}px`,
+        }
+      }, headline),
+      React.createElement('div', {
+        style: {
+          fontSize: '24px',
+          fontFamily: fonts.body,
+          color: colors.text,
+          lineHeight: 1.5,
+          maxWidth: '80%',
+        }
+      }, subtext),
+    ),
+    // CTA button
+    React.createElement('div', {
+      style: {
+        display: 'flex',
+        backgroundColor: colors.gold,
+        padding: `${spacing.sm}px ${spacing.md}px`,
+        alignSelf: 'flex-start',
+        borderRadius: '4px',
+      }
+    },
+      React.createElement('div', {
+        style: {
+          fontSize: `${typeScale.body}px`,
+          fontFamily: fonts.mono,
+          fontWeight: 700,
+          color: colors.bg,
+          letterSpacing: '3px',
+          textTransform: 'uppercase' as const,
+        }
+      }, cta),
+    ),
+  )
 }

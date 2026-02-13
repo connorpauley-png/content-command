@@ -289,6 +289,7 @@ export default function SetupPageV2() {
       brandVoice,
       usp,
       contentRules,
+      brandColors: { primary: brandColor, accent: brandColor, background: '#0a0a0a', text: '#ffffff' },
     }
     const strategy: ContentStrategy = {
       document: strategyDoc,

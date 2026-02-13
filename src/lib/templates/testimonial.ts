@@ -1,40 +1,96 @@
-import { htmlWrap, baseBg, headerBar, footerBar, textureDashes } from './html-base';
+import React from 'react'
+import { colors, fonts, typeScale, spacing } from './design-system'
+import type { TemplateData } from './quote-card'
 
-interface TestimonialData {
-  quote: string;
-  name?: string;
-  author?: string;
-  location?: string;
-  rating?: number;
-  brandColors?: { primary?: string; accent?: string; background?: string; text?: string; companyName?: string };
-}
+export function TestimonialElement(data: TemplateData): React.ReactNode {
+  const quote = data.quote || 'Absolutely incredible work. Transformed our entire yard in one day.'
+  const author = data.author || 'Happy Customer'
+  const rating = (data.rating as number) || 4.9
 
-export function Testimonial(data: TestimonialData): string {
-  const a = data.brandColors?.accent || '#e2b93b';
-  const co = data.brandColors?.companyName || 'COLLEGE BROS';
-  const authorName = data.name || data.author || '';
-  const rating = data.rating || 5;
   const stars = Array.from({ length: 5 }, (_, i) =>
-    `<span style="color:${i < rating ? a : '#333333'};font-size:28px;margin-right:4px;">★</span>`
-  ).join('');
+    React.createElement('div', {
+      key: i,
+      style: { fontSize: '36px', color: colors.gold, marginRight: '8px' }
+    }, '\u2605')
+  )
 
-  return htmlWrap(`
-<div style="position:relative;width:1080px;height:1080px;${baseBg()}overflow:hidden;">
-  ${textureDashes()}
-  <div style="position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:50px 60px;">
-    ${headerBar('TESTIMONIAL', co)}
-    <!-- Decorative quotation mark -->
-    <div style="position:absolute;top:120px;right:60px;font-family:'Playfair Display',serif;font-size:240px;color:rgba(255,255,255,0.04);line-height:1;pointer-events:none;">"</div>
-    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 0;">
-      <p style="font-family:'Playfair Display',serif;font-weight:700;font-style:italic;font-size:48px;color:#ffffff;line-height:1.25;max-width:920px;">${data.quote}</p>
-    </div>
-    <div style="margin-bottom:16px;">
-      <div style="margin-bottom:16px;">${stars}</div>
-      <div style="width:50px;height:2px;background:${a};margin-bottom:16px;"></div>
-      <span style="font-family:'Inter',sans-serif;font-weight:700;font-size:22px;color:#ffffff;display:block;">${authorName}</span>
-      ${data.location ? `<span style="font-family:'Inter',sans-serif;font-weight:400;font-size:16px;color:#888888;margin-top:6px;display:block;">${data.location}</span>` : ''}
-    </div>
-    ${footerBar(co)}
-  </div>
-</div>`);
+  return React.createElement('div', {
+    style: {
+      display: 'flex',
+      flexDirection: 'column' as const,
+      width: '100%',
+      height: '100%',
+      backgroundColor: colors.bg,
+      padding: `${spacing.xl}px`,
+      fontFamily: fonts.body,
+      border: `1px solid ${colors.border}`,
+    }
+  },
+    // Stars row
+    React.createElement('div', {
+      style: { display: 'flex', flexDirection: 'row' as const, marginBottom: `${spacing.md}px` }
+    }, ...stars),
+    // Quote
+    React.createElement('div', {
+      style: {
+        display: 'flex',
+        flexDirection: 'row' as const,
+        flex: 1,
+      }
+    },
+      React.createElement('div', {
+        style: {
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column' as const,
+          justifyContent: 'center',
+        }
+      },
+        React.createElement('div', {
+          style: {
+            fontSize: `${Math.min(40, Math.max(28, 2000 / quote.length))}px`,
+            fontFamily: fonts.headline,
+            color: colors.text,
+            lineHeight: 1.35,
+            marginBottom: `${spacing.md}px`,
+          }
+        }, `\u201C${quote}\u201D`),
+        React.createElement('div', {
+          style: {
+            fontSize: `${typeScale.caption}px`,
+            fontFamily: fonts.mono,
+            color: colors.text,
+            letterSpacing: '2px',
+            textTransform: 'uppercase' as const,
+          }
+        }, author),
+        React.createElement('div', {
+          style: {
+            fontSize: '14px',
+            fontFamily: fonts.mono,
+            color: colors.accent,
+            marginTop: '8px',
+          }
+        }, 'Verified Customer'),
+      ),
+      // Big rating number
+      React.createElement('div', {
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '200px',
+        }
+      },
+        React.createElement('div', {
+          style: {
+            fontSize: '120px',
+            fontFamily: fonts.headline,
+            color: colors.gold,
+            opacity: 0.9,
+          }
+        }, String(rating)),
+      ),
+    ),
+  )
 }
